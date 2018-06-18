@@ -1,0 +1,14 @@
+{
+    "name": "chris/coinslide-back-end",
+    "description": "restAPI package",
+    "type": "restAPI",
+    "authors": [
+        {
+            "name": "Coinslide Team"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^2.4",
+        "google/apiclient": "^2.2"
+    }
+}
