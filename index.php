@@ -1,6 +1,11 @@
 <?php
     require_once __DIR__."/config/googleLogin.php";
     require_once __DIR__.'/config/DatabaseMysql.php';
+    require_once __DIR__.'/class/ValidateEmailinDatabase.php';
+
+    // $db = new DatabaseMysql();
+    // $cuser = new ValidateEmailinDatabase();
+    // $cuser->checkEmail("daniels.uth702@gmail.com", $db);
 
 	if (isset($_SESSION['access_token'])) {
 		header('Location: index.php');
@@ -37,7 +42,7 @@
         </div>
     </div>
     <?php
-    phpinfo();
+   
     ?>
 </body>
 </html>

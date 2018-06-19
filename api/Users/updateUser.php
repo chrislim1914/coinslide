@@ -18,14 +18,17 @@ $user = new  Users($dbmysql);
 $data = json_decode(file_get_contents("php://input"));
 
 // set ID property of user to be edited
-$user->uid = $data->uid;
+$user->iduser = $data->iduser;
 
 //property value
-$user->ufirstname = $data->ufirstname;
-$user->ulastname = $data->ulastname;
-$user->uemail = $data->uemail;
-$user->unickname = $data->unickname;
-$user->upw = $data->upw;
+$user->first_name = $data->first_name;
+$user->last_name = $data->last_name;
+$user->email = $data->email;
+$user->phone = $data->phone;
+$user->nickname = $data->nickname;
+$user->password = $data->password;
+$user->national = $data->national;
+$user->iduser = $data->iduser;
 
 //update User
 if($user->updateUser()) {

@@ -7,7 +7,7 @@
 		$token = $gClient->fetchAccessTokenWithAuthCode($_GET['code']);
 		$_SESSION['access_token'] = $token;
 	} else {
-		header('Location: ../index.php');
+		header('Location: ../users.php');
 		exit();
 	}
 
@@ -21,6 +21,6 @@
 	$_SESSION['familyName'] = $userData['familyName'];
 	$_SESSION['givenName'] = $userData['givenName'];
 
-	header('Location: ../index.php');
+	header('Location: ../users.php');
 	exit();
 ?>

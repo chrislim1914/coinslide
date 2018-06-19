@@ -11,5 +11,8 @@
 	$gClient->setClientId($clientid);
 	$gClient->setClientSecret($clientSecret);
 	$gClient->setApplicationName("coinslide-alpha");
-	$gClient->setRedirectUri("http://localhost:8000/config/googleCallback.php");
-	$gClient->addScope("profile https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email");
+	$gClient->setRedirectUri("http://localhost:8900/config/googleCallback.php");
+    $gClient->addScope("profile https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email");
+    $gClient->createAuthUrl();
+
+    return $gClient;
