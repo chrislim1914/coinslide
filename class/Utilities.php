@@ -138,9 +138,3 @@ class Utilities{
     }
  
 }
-
-$core = new Utilities();
-print_r($core->get_time_ago(strtotime('now')));
-echo ' '.date("Y-m-d h:i:s");
-echo '<br />';
-print_r($core->defaultTimeZone());
