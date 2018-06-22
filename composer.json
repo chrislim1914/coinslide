@@ -9,6 +9,7 @@
     ],
     "require": {
         "vlucas/phpdotenv": "^2.4",
-        "google/apiclient": "^2.2"
+        "google/apiclient": "^2.2",
+        "facebook/graph-sdk": "^5.6"
     }
 }
