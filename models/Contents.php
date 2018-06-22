@@ -72,7 +72,7 @@ class Contents {
     }
 
     //content pagination
-    public function readPaging($from_record_num, $defaultRecordPerPage) {
+    public function readPaging($from_record_num, $records_per_page) {
 
         // select query
             $query = 'SELECT
@@ -90,12 +90,9 @@ class Contents {
         // prepare query statement
         $stmt = $this->mysql_conn->prepare($query);
 
-        // sanitize
-        $defaultRecordPerPage=htmlspecialchars(strip_tags($defaultRecordPerPage));
-
         // bind variable values
         $stmt->bindParam(1, $from_record_num, PDO::PARAM_INT);
-        $stmt->bindParam(2, $defaultRecordPerPage, PDO::PARAM_INT);
+        $stmt->bindParam(2, $records_per_page, PDO::PARAM_INT);
 
         // execute query
         $stmt->execute();

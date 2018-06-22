@@ -48,7 +48,7 @@ if($num>0){
  
     // include paging
     $total_rows=$contents->count();
-    $page_url="http://localhost:8900/api/contents/readPaging.php?";
+    $page_url="http://localhost:8900/api/contents/contentsPagination.php?";
     $paging=$utilities->getPaging($page, $total_rows, $records_per_page, $page_url);
     $contents_arr["paging"]=$paging;
  
