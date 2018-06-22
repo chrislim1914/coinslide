@@ -46,7 +46,7 @@ if($num>0){
     echo json_encode($users_arr);
 } else {
     echo json_encode(
-        array("message" => "No Users are found.")
+        array("message" => "Users not found.")
     );
 }
  

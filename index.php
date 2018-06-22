@@ -1,18 +1,21 @@
 <?php
-    require_once __DIR__."/config/googleLogin.php";
+    
+    require_once __DIR__."/config/GoogleLogin.php";
+    require_once __DIR__."/config/facebookLogin.php";
     require_once __DIR__.'/config/DatabaseMysql.php';
-    require_once __DIR__.'/class/ValidateEmailinDatabase.php';
-
-    // $db = new DatabaseMysql();
-    // $cuser = new ValidateEmailinDatabase();
-    // $cuser->checkEmail("daniels.uth702@gmail.com", $db);
 
 	if (isset($_SESSION['access_token'])) {
-		header('Location: index.php');
+		header('Location: users.php');
 		exit();
 	}
 
-	$loginURL = $gClient->createAuthUrl();
+    $g = new GoogleLogin();
+    $g->googleSetAuthentication();
+    $loginURL = $g->gClient->createAuthUrl();
+    
+    $redirectURL = "https://localhost:8900/config/facebookCallback.php";
+	$permissions = ['email'];
+	$fblogin = $helper->getLoginUrl($redirectURL, $permissions);
 ?>
 <!doctype html>
 <html lang="en">
@@ -36,6 +39,7 @@
                     <input type="password" disable="yes" placeholder="Password..." name="password" class="form-control"><br>
                     <input type="submit" value="Log In" class="btn btn-primary">
                     <input type="button" onclick="window.location = '<?php echo $loginURL ?>';" value="Log In With Google" class="btn btn-danger">
+                    <input type="button" onclick="window.location = '<?php echo $fblogin ?>';" value="Log In With Facebook" class="btn btn-primary">
                 </form>
 
             </div>

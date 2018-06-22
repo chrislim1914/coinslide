@@ -2,7 +2,7 @@
 	session_start();
 
 	if (!isset($_SESSION['access_token'])) {
-		header('Location: login.php');
+		header('Location: index.php');
 		exit();
 	}
 ?>
@@ -45,10 +45,6 @@
 					<tr>
 						<td>Gender</td>
 						<td><?php echo $_SESSION['gender'] ?></td>
-					</tr>
-                    <tr>
-						<td>Gender</td>
-						<td><?php echo $_SESSION['picture'] ?></td>
 					</tr>
 				</tbody>
 			</table>

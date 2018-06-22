@@ -17,6 +17,8 @@ class Users {
     public $delete;
     public $national;
     public $createdate;
+    public $snsProviderName;
+    public $snsProviderId;
 
     //initialize connection
     public function __construct($db) {
@@ -32,6 +34,7 @@ class Users {
         $stmt->execute();
         return $stmt;
     }
+    
     //get one Users
     public function readOneUser() {
         //query statement
@@ -106,33 +109,35 @@ class Users {
     // update User
     public function updateUser() {
         //query statement
-        $query = "UPDATE "   .$this->table. 
-                    " SET ufirstname = :ufirstname,
-                    ulastname = :ulastname, 
-                    uemail = :uemail, 
-                    unickname = :unickname, 
-                    upw = :upw  
-                    WHERE uid = :uid";
+        $query = "UPDATE " .$this->table. 
+                    " SET first_name = :first_name, 
+                    last_name = :last_name, 
+                    email = :email, 
+                    phone = :phone, 
+                    nickname = :nickname,
+                    national = :national  
+                    WHERE iduser = :iduser";
 
         //prepare query statement        
         $stmt = $this->mysql_conn->prepare($query);
-        var_dump($stmt);
 
         //sanitize        
-        $this->ufirstname=htmlspecialchars(strip_tags($this->ufirstname));
-        $this->ulastname=htmlspecialchars(strip_tags($this->ulastname));
-        $this->uemail=htmlspecialchars(strip_tags($this->uemail));
-        $this->unickname=htmlspecialchars(strip_tags($this->unickname));
-        $this->upw=htmlspecialchars(strip_tags($this->upw));
-        $this->uid=htmlspecialchars(strip_tags($this->uid));
+        $this->first_name=htmlspecialchars(strip_tags($this->first_name));
+        $this->last_name=htmlspecialchars(strip_tags($this->last_name));
+        $this->email=htmlspecialchars(strip_tags($this->email));
+        $this->phone=htmlspecialchars(strip_tags($this->phone));
+        $this->nickname=htmlspecialchars(strip_tags($this->nickname));
+        $this->national=htmlspecialchars(strip_tags($this->national));
+        $this->iduser=htmlspecialchars(strip_tags($this->iduser));
         
         // bind values        
-        $stmt->bindParam(":ufirstname", $this->ufirstname);
-        $stmt->bindParam(":ulastname", $this->ulastname);
-        $stmt->bindParam(":uemail", $this->uemail);
-        $stmt->bindParam(":unickname", $this->unickname);
-        $stmt->bindParam(":upw", $this->upw);
-        $stmt->bindParam(":uid", $this->uid);
+        $stmt->bindParam(":first_name", $this->first_name);
+        $stmt->bindParam(":last_name", $this->last_name);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":phone", $this->phone);
+        $stmt->bindParam(":nickname", $this->nickname);
+        $stmt->bindParam(":national", $this->national);
+        $stmt->bindParam(":iduser", $this->iduser);
 
         // execute query
         if($stmt->execute()){
@@ -145,19 +150,48 @@ class Users {
 
     }
 
-    // delete user
+    // update User password
+    public function updateUserPassword() {
+        //query statement
+        $query = "UPDATE "   .$this->table. 
+                    " SET password = :password
+                    WHERE iduser = :iduser";
+
+        //prepare query statement        
+        $stmt = $this->mysql_conn->prepare($query);
+
+        //sanitize        
+        $this->password=htmlspecialchars(strip_tags($this->password));
+        $this->iduser=htmlspecialchars(strip_tags($this->iduser));
+        
+        // bind values        
+        $stmt->bindParam(":password", $this->password);
+        $stmt->bindParam(":iduser", $this->iduser);
+
+        // execute query
+        if($stmt->execute()){
+            return true;
+        }
+        
+        printf("Error: %s.\n", $stmt->error);
+        return false;
+        
+
+    }
+
+    // soft delete user
     public function deleteUser() {
         //query statement
-        $query = "DELETE FROM " .$this->table. " WHERE uid = :uid";
+        $query = "UPDATE " .$this->table. " SET `delete` = 1 WHERE iduser = :iduser";
 
         // prepare statement
         $stmt = $this->mysql_conn->prepare($query);
 
         //sanitize
-        $this->uid=htmlspecialchars(strip_tags($this->uid));
+        $this->iduser=htmlspecialchars(strip_tags($this->iduser));
         
         // bind values
-        $stmt->bindParam(":uid", $this->uid);
+        $stmt->bindParam(":iduser", $this->iduser);
 
         // execute query
         if($stmt->execute()){
@@ -168,5 +202,64 @@ class Users {
         return false;
 
     }
+    
+    //validate email: if email is already in database
+    public function validateDuplicateEmail($email) {
+
+        //query statement
+        $query = 'SELECT COUNT(*) AS count from user where email = :email LIMIT 1';
+
+        //prepare query statement
+        $stmt = $this->mysql_conn->prepare($query);
+
+        // bind email of user
+        $stmt->bindParam(":email", $email);
+
+        // execute query
+        $stmt->execute();
+    
+        // get retrieved row
+        return $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    }
+
+    //create user with SNS data
+    public function createSNSUser() {
+        //query for insert
+        $query = 'INSERT INTO ' .$this->table. '
+                    SET first_name = :first_name, 
+                    last_name = :last_name, 
+                    email = :email, 
+                    password = :password,
+                    snsProviderName = :snsProviderName, 
+                    snsProviderId = :snsProviderId';
+
+        //prepare query statement
+        $stmt = $this->mysql_conn->prepare($query);
+
+        //sanitize
+        $this->first_name=htmlspecialchars(strip_tags($this->first_name));
+        $this->last_name=htmlspecialchars(strip_tags($this->last_name));
+        $this->email=htmlspecialchars(strip_tags($this->email));
+        $this->password=htmlspecialchars(strip_tags($this->password));
+        $this->snsProviderName=htmlspecialchars(strip_tags($this->snsProviderName));
+        $this->snsProviderId=htmlspecialchars(strip_tags($this->snsProviderId));
+        
+        // bind values
+        $stmt->bindParam(":first_name", $this->first_name);
+        $stmt->bindParam(":last_name", $this->last_name);
+        $stmt->bindParam(":email", $this->email);
+        $stmt->bindParam(":password", $this->password);
+        $stmt->bindParam(":snsProviderName", $this->snsProviderName);
+        $stmt->bindParam(":snsProviderId", $this->snsProviderId);
+        // execute query
+        if($stmt->execute()){
+            return true;
+        }
+        
+        printf("Error: %s.\n", $stmt->error);
+        return false;
+    }
+    
 
 }

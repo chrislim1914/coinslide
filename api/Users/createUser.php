@@ -31,13 +31,22 @@ $user->nickname = $data->nickname;
 $user->password = $data->password;
 $user->national = $data->national;
 
-//create User
-if($user->createUser()) {
-    echo json_encode(
-        array('message' => 'User Created')
-    );
+//query statement for users
+$stmt = $user->validateDuplicateEmail($data->email);
+
+if($stmt[count] == 0) {
+    //create User
+    if($user->createUser()) {
+        echo json_encode(
+            array('message' => 'User Created')
+        );
+    } else {
+        echo json_encode(
+            array('message' => 'User Not Created')
+        );
+    }    
 } else {
     echo json_encode(
-        array('message' => 'User Not Created')
+        array('message' => 'User email is already in database')
     );
 }
