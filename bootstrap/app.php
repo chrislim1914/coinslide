@@ -80,12 +80,6 @@ $app->routeMiddleware([
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
-class_alias('Laravel\Socialite\Facades\Socialite', 'Socialite');
-
-
-// socialite
-$app->register(Laravel\Socialite\SocialiteServiceProvider::class);
-$app->register(Laravel\Socialite\Facades\Socialite::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*
