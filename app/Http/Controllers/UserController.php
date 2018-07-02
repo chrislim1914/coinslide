@@ -39,6 +39,7 @@ class UserController extends Controller
             return response()->json(['status' => 'fail'],401);    
         } 
    }
+
     /**
      * method to retrieved all active users
      * 
@@ -282,6 +283,36 @@ class UserController extends Controller
             echo json_encode(
                 array("message" => "User not found.")
             );
+        }
+    }
+
+    /**
+     * method to soft delete user
+     * 
+     * @return $id
+     */
+    public function deleteUser($id){
+
+        $Users  = User::all()
+                        ->where('iduser', $id)
+                        ->where('delete', 0);        
+
+        if($Users->count() > 0 ) {          
+            //soft delete user
+            $deleteUser = User::where('iduser', $id);
+            if($deleteUser->update(['delete' => '1'])){
+                echo json_encode(
+                    array("message" => "Account is Deleted.")
+                ); 
+            } else {
+                echo json_encode(
+                    array("message" => "Account Deletion Failed.")
+                ); 
+            }              
+        } else {
+            echo json_encode(
+                array("message" => "User not found.")
+            );           
         }
     }
 }

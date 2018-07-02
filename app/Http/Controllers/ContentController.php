@@ -22,18 +22,18 @@ class ContentController extends Controller {
         //create query contents inner joint users
         $content = DB::table('contents')
                         ->join('users', 'contents.user_id', '=', 'users.iduser')
+                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent' )
                         ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse('contents.createdate')."' as timelapse")),
-                                'contents.delete')
+                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as timelapse")),
+                                'contents.delete', DB::raw('Count(likes.islike) as `like`'))
                         ->where('contents.delete', 0)
-                        ->orderBy('idcontent', 'desc')
+                        ->where('likes.islike', 1)
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $content;
-
-        if($cursor->count() > 0 ) {   
-                
+                                        
+        if($cursor->count() > 0 ) {                
                 return response()->json($cursor);
         } else {
             echo json_encode(
@@ -50,9 +50,16 @@ class ContentController extends Controller {
      */
     public function contentPaginate(){
 
-        $Contents = Contents::orderBy('idcontent', 'desc')
+        $content = DB::table('contents')
+                        ->join('users', 'contents.user_id', '=', 'users.iduser')
+                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent')
+                        ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
+                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse('contents.createdate')."' as timelapse")),
+                                'contents.delete', DB::raw('Count(likes.islike) as `like`'))
+                        ->where('contents.delete', 0)
+                        ->where('likes.islike', 1)
                         ->paginate(5);
-        return response()->json($Contents);
+        return response()->json($Content);
     }
 
     /**
@@ -107,6 +114,8 @@ class ContentController extends Controller {
             echo json_encode(
                 array("message" => "New Contents Created.")
             );
+
+            echo $Contents->idcontent;
         } else {
             echo json_encode(
                 array("message" => "Contents not created.")
@@ -117,7 +126,7 @@ class ContentController extends Controller {
     /**
      * method to create content 
      * 
-     * @return Request $request %id
+     * @return Request $request $id
      */
     public function updateContent(Request $request, $id){
 
@@ -146,11 +155,41 @@ class ContentController extends Controller {
             echo json_encode(
                 array("message" => "Content not found.")
             );   
-        }
-
-        
+        }        
     }
 
+    /**
+     * method to soft delete content
+     * 
+     * @return $id
+     */
+    public function deleteContent($id){
+        //find content info
+        $Contents = Contents::where('idcontent', $id)
+                            ->where('delete', 0)
+                            ->get();
+
+        if($Contents->count() > 0 ) {
+            //update content
+            $updateContents = Contents::where('idcontent', $id);
+                if($updateContents->update([
+                                    'delete'         => '1'
+                                    ])) {
+                    echo json_encode(
+                        array("message" => "Content Deleted.")
+                    );
+                } else {
+                    echo json_encode(
+                        array("message" => "Content deletion failed.")
+                    );
+                }
+        } else {
+            echo json_encode(
+                array("message" => "Content not found.")
+            );   
+        }
+
+    }
     /**
      * method to get one content info
      * 
@@ -161,11 +200,13 @@ class ContentController extends Controller {
         //create query contents inner joint users
         $content = DB::table('contents')
                         ->join('users', 'contents.user_id', '=', 'users.iduser')
+                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent')
                         ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
                                 'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse('contents.createdate')."' as timelapse")),
-                                'contents.delete')
+                                'contents.delete', DB::raw('Count(likes.islike) as `like`'), DB::raw('(likes.iduser) as `whoeliked`'))
                         ->where('contents.delete', 0)
                         ->where('contents.idcontent', $id)
+                        ->where('likes.islike', 1)
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:

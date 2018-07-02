@@ -29,6 +29,8 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->post('User/update/{id}','UserController@updateUser');
 	$router->post('User/updatePassword/{id}','UserController@updatePassword');
 	$router->post('User/Search/','UserController@searchUser');
+	$router->post('User/delete/{id}','UserController@deleteUser');
+	
 });
 
 /**
@@ -58,4 +60,15 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->post('Content/Search','ContentController@searchContent');
 	$router->post('Content/create','ContentController@createContent');
 	$router->post('Content/update/{id}','ContentController@updateContent');
+	$router->post('Content/delete/{id}','ContentController@deleteContent');
+});
+
+/**
+ * API Route for Likes
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Likes/','LikeController@all');
 });
