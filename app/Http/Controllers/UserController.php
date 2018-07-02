@@ -24,13 +24,11 @@ class UserController extends Controller
             'password' => 'required' 
             ]);
 
-        $user = User::where('email', $request->input('email'))->first();
-        echo $request->input('password');
-        echo $user->password;
+        $user = User::where('email', $request->email)->first();
 
         $hash = new PasswordEncrypt();
 
-        if($hash->verifyPassword($request->input('password'), $user->password)){  
+        if($hash->verifyPassword($request->password, $user->password)){  
 
             $apikey = base64_encode(str_random(40));
             return response()->json([
@@ -230,5 +228,60 @@ class UserController extends Controller
                 );
             }
         }        
+    }
+
+    /**
+     * method to update password
+     * first check if the inputed password is same as prevoius
+     * then there is nothing to update the password
+     * else then update the password
+     * 
+     * 
+     * @return Request $request $id
+     */
+    public function updatePassword(Request $request, $id){
+
+        //get the user info first
+        $Users  = User::where('iduser', $id)
+                        ->where('delete', 0)
+                        ->get();
+        
+        $inputPass = $request->password;
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $Users;
+        
+        if($cursor->count() > 0 ) {
+            
+            foreach ($cursor as $User) {
+                        $oldPass = $User->password;
+            }   
+                //instantiate PasswordEncrypt
+                $hash = new PasswordEncrypt();
+                
+                /**
+                 * check if password is same with inputed password
+                 * 
+                 * if the same then tell there is nothing to update
+                 * 
+                 * else then hash the inputed password string then hash and update the table
+                 */
+                if($hash->verifyPassword($inputPass, $oldPass)) {
+                    echo json_encode(
+                        array("message" => "there is nothing to update.")
+                    );
+                } else {
+                    //update password
+                    $updateUser = User::where('iduser', $id);
+                    $updateUser->update(['password' => $hash->hash($inputPass)]);
+                    echo json_encode(
+                        array("message" => "User password Updated.")
+                    );                    
+                } 
+        } else {
+            echo json_encode(
+                array("message" => "User not found.")
+            );
+        }
     }
 }

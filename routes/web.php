@@ -15,34 +15,47 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 
+/**
+ * API Route for User
+ * 
+ * @return $route
+ */
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('login/','UserController@authenticate');
 	$router->get('User/','UserController@readUsers');
 	$router->get('User/{id}','UserController@getUser');
-	$router->post('User/createUser','UserController@createUser');
-	$router->post('User/updateUser/{id}','UserController@updateUser');
+	$router->post('User/create','UserController@createUser');
+	$router->post('User/update/{id}','UserController@updateUser');
+	$router->post('User/updatePassword/{id}','UserController@updatePassword');
 	$router->post('User/Search/','UserController@searchUser');
 });
 
+/**
+ * API Route for Banner
+ * 
+ * @return $route
+ */
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Banner/','BannerController@readAllBanners');
 	$router->post('Banner/Search/','BannerController@searchBanner');
-	$router->get('Banneractive/','BannerController@activeBanner');
-	$router->post('Banner/createBanner/','BannerController@createBanner');
-	$router->post('Banner/updateBanner/{id}','BannerController@updateBanner');
+	$router->get('Banner/active/','BannerController@activeBanner');
+	$router->post('Banner/create/','BannerController@createBanner');
+	$router->post('Banner/update/{id}','BannerController@updateBanner');
 });
 
+/**
+ * API Route for Content
+ * 
+ * @return $route
+ */
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Content/','ContentController@readAllContent');
 	$router->get('Contentlist/','ContentController@contentPaginate');
+	$router->get('Content/{id}','ContentController@contentReadOne');
+	$router->post('Content/Search','ContentController@searchContent');
+	$router->post('Content/create','ContentController@createContent');
+	$router->post('Content/update/{id}','ContentController@updateContent');
 });
-
-//FB
-$router->get('/redirectfb', 'SocialAuthController@redirectFB');
-$router->get('/callbackfb', 'SocialAuthController@callbackFB');
-// google+
-$router->get('/redirectg', 'SocialAuthController@redirectG');
-$router->get('/callbackg', 'SocialAuthController@callbackG');
