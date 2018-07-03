@@ -22,12 +22,10 @@ class ContentController extends Controller {
         //create query contents inner joint users
         $content = DB::table('contents')
                         ->join('users', 'contents.user_id', '=', 'users.iduser')
-                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent' )
                         ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
                                 'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as timelapse")),
-                                'contents.delete', DB::raw('Count(likes.islike) as `like`'))
+                                'contents.delete')
                         ->where('contents.delete', 0)
-                        ->where('likes.islike', 1)
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:

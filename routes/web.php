@@ -22,15 +22,14 @@ $router->get('/', function () use ($router) {
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('login/','UserController@authenticate');
-	$router->get('User/','UserController@readUsers');
-	$router->get('User/{id}','UserController@getUser');
-	$router->post('User/create','UserController@createUser');
-	$router->post('User/update/{id}','UserController@updateUser');
-	$router->post('User/updatePassword/{id}','UserController@updatePassword');
-	$router->post('User/Search/','UserController@searchUser');
-	$router->post('User/delete/{id}','UserController@deleteUser');
-	
+	$router->get('login/', ['middleware' => 'cors', 'uses' => 'UserController@authenticate']);
+	$router->get('User/', ['middleware' => 'cors', 'uses' => 'UserController@readUsers']);
+	$router->get('User/{id}', ['middleware' => 'cors', 'uses' => 'UserController@getUser']);
+	$router->post('User/create', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
+	$router->post('User/update/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updateUser']);
+	$router->post('User/updatePassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
+	$router->post('User/Search/', ['middleware' => 'cors', 'uses' => 'UserController@searchUser']);
+	$router->post('User/delete/{id}', ['middleware' => 'cors', 'uses' => 'UserController@deleteUser']);	
 });
 
 /**
@@ -40,11 +39,11 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('Banner/','BannerController@readAllBanners');
-	$router->post('Banner/Search/','BannerController@searchBanner');
-	$router->get('Banner/active/','BannerController@activeBanner');
-	$router->post('Banner/create/','BannerController@createBanner');
-	$router->post('Banner/update/{id}','BannerController@updateBanner');
+	$router->get('Banner/', ['middleware' => 'cors', 'uses' => 'BannerController@readAllBanners']);
+	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);
+	$router->get('Banner/active/', ['routeMiddleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
+	$router->post('Banner/create/', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
+	$router->post('Banner/update/{id}', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
 });
 
 /**
@@ -54,13 +53,13 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('Content/','ContentController@readAllContent');
-	$router->get('Contentlist/','ContentController@contentPaginate');
-	$router->get('Content/{id}','ContentController@contentReadOne');
-	$router->post('Content/Search','ContentController@searchContent');
-	$router->post('Content/create','ContentController@createContent');
-	$router->post('Content/update/{id}','ContentController@updateContent');
-	$router->post('Content/delete/{id}','ContentController@deleteContent');
+	$router->get('Content/', ['middleware' => 'cors', 'uses' => 'ContentController@readAllContent']);
+	$router->get('Contentlist/', ['middleware' => 'cors', 'uses' => 'ContentController@contentPaginate']);
+	$router->get('Content/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@contentReadOne']);
+	$router->post('Content/Search', ['middleware' => 'cors', 'uses' => 'ContentController@searchContent']);
+	$router->post('Content/create', ['middleware' => 'cors', 'uses' => 'ContentController@createContent']);
+	$router->post('Content/update/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@updateContent']);
+	$router->post('Content/delete/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@deleteContent']);
 });
 
 /**
