@@ -34,6 +34,29 @@ class BannerController extends Controller {
     }
 
     /**
+     * method to retrieved single banner
+     * 
+     * @param $id
+     * @return Response
+     */
+    public function readBanner($id){
+
+        //get Banner info
+        $Banner  = Banner::where('idbanner', $id)->get();
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $Banner;
+
+        if($cursor->count() > 0 ) {
+            return response()->json($cursor);
+        } else {
+            echo json_encode(
+                array("message" => "Banner not found.")
+            );
+        }
+    }
+
+    /**
      * method to search banner table by title description
      * with pagination
      * 

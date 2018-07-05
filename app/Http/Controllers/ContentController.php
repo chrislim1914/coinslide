@@ -23,10 +23,10 @@ class ContentController extends Controller {
         $content = DB::table('contents')
                         ->join('users', 'contents.user_id', '=', 'users.iduser')
                         ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as timelapse")),
+                                'contents.createdate', 'contents.modifieddate', DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as timelapse"),
                                 'contents.delete')
                         ->where('contents.delete', 0)
-                        ->get();
+                        ->paginate(5);
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $content;
@@ -38,26 +38,6 @@ class ContentController extends Controller {
                 array("message" => "No Content are found.")
             );
         }
-    }
-
-    /**
-     * method to read all content in desc order by idcontent
-     * with pagination
-     * 
-     * @return Responce
-     */
-    public function contentPaginate(){
-
-        $content = DB::table('contents')
-                        ->join('users', 'contents.user_id', '=', 'users.iduser')
-                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent')
-                        ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse('contents.createdate')."' as timelapse")),
-                                'contents.delete', DB::raw('Count(likes.islike) as `like`'))
-                        ->where('contents.delete', 0)
-                        ->where('likes.islike', 1)
-                        ->paginate(5);
-        return response()->json($Content);
     }
 
     /**
@@ -112,8 +92,6 @@ class ContentController extends Controller {
             echo json_encode(
                 array("message" => "New Contents Created.")
             );
-
-            echo $Contents->idcontent;
         } else {
             echo json_encode(
                 array("message" => "Contents not created.")
@@ -197,24 +175,34 @@ class ContentController extends Controller {
 
         //create query contents inner joint users
         $content = DB::table('contents')
-                        ->join('users', 'contents.user_id', '=', 'users.iduser')
-                        ->join('likes', 'contents.idcontent', '=', 'likes.idcontent')
+                        ->join('users', 'contents.user_id', '=', 'users.iduser')               
                         ->select('contents.idcontent', 'contents.user_id', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', //(DB::raw("'".$this->timeLapse('contents.createdate')."' as timelapse")),
-                                'contents.delete', DB::raw('Count(likes.islike) as `like`'), DB::raw('(likes.iduser) as `whoeliked`'))
+                                'contents.createdate', 'contents.modifieddate', 'contents.delete')
                         ->where('contents.delete', 0)
                         ->where('contents.idcontent', $id)
-                        ->where('likes.islike', 1)
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $content;
 
         if($cursor->count() > 0 ) {                   
-                return response()->json($cursor);
+            foreach($cursor as $new) {
+                return response()->json([
+                    'idcontent' => $new->idcontent,
+                    'iduser' => $new->user_id,
+                    'nickname' => $new->nickname,
+                    'title' => $new->title,
+                    'content' => $new->content,
+                    'description' => $new->description,
+                    'createdate' => $new->createdate,
+                    'modifieddate' => $new->modifieddate,
+                    'timelapse' => $this->timeLapse($new->createdate),
+                    'delete' => $new->delete,
+                ]);                
+            }
         } else {
             echo json_encode(
-                array("message" => "No Content are found.")
+                array("message" => "Content not found.")
             );
         }
         
@@ -249,7 +237,7 @@ class ContentController extends Controller {
         } elseif($timelapse->diffInMonths($current) <= 12){
             return $timelapse->diffInMonths($current). ' Months ago';
         } else {
-            return $timelapse>diffInYears($current). ' years ago';
+            return $timelapse->diffInYears($current). ' years ago';
         }
     }
 }
