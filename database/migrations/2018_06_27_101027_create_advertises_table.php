@@ -15,7 +15,12 @@ class CreateAdvertisesTable extends Migration
     {
         Schema::create('advertises', function (Blueprint $table) {
             $table->increments('idadvertise');
-            $table->integer('admin_id');
+            $table->integer('idadvertisers');
+            $table->string('adcategory');
+            $table->string('title');
+            $table->string('content');
+            $table->string('url');
+            $table->string('img');
             $table->timestampTz('createdate');
             $table->timestamp('startdate');
             $table->timestamp('enddate');
