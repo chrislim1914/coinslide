@@ -26,6 +26,7 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->get('User/', ['middleware' => 'cors', 'uses' => 'UserController@readUsers']);
 	$router->get('User/{id}', ['middleware' => 'cors', 'uses' => 'UserController@getUser']);
 	$router->post('User/create', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
+	$router->options('User/create', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
 	$router->post('User/update/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updateUser']);
 	$router->post('User/updatePassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
 	$router->post('User/Search/', ['middleware' => 'cors', 'uses' => 'UserController@searchUser']);
@@ -40,8 +41,9 @@ $router->group(['prefix' => 'api/'], function($router)
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Banner/', ['middleware' => 'cors', 'uses' => 'BannerController@readAllBanners']);
-	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);
-	$router->get('Banner/active/', ['routeMiddleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
+	$router->get('Banner/read/{id}', ['middleware' => 'cors', 'uses' => 'BannerController@readBanner']);
+	$router->get('Banner/active/', ['middleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
+	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);	
 	$router->post('Banner/create/', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
 	$router->post('Banner/update/{id}', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
 });
@@ -69,5 +71,21 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('Likes/','LikeController@all');
+	$router->post('like/', ['middleware' => 'cors', 'uses' => 'LikeController@like']);
+	$router->post('dislike/', ['middleware' => 'cors', 'uses' => 'LikeController@dislike']);
+	$router->get('contentLike/{id}', ['middleware' => 'cors', 'uses' => 'LikeController@contentLike']);
+	$router->get('contentDislike/{id}', ['middleware' => 'cors', 'uses' => 'LikeController@contentDislike']);
+});
+
+/**
+ * API Route for Advertise
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Ads/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@adsList']);
+	$router->get('Ads/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
+	$router->post('Ads/create/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@createAds']);
+	$router->post('Ads/update/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@updateAds']);
 });
