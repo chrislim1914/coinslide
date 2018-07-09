@@ -48,7 +48,7 @@ class UserController extends Controller
     public function readUsers(){
                 
         $Users  = User::where('delete', 0)
-                        ->orderBy('last_name', 'asc')
+                        ->orderBy('iduser', 'desc')
                         ->paginate(5);
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $Users;

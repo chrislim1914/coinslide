@@ -23,7 +23,9 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__.'/../')
 );
 
-$app->withFacades();
+$app->withFacades([
+    'Image' => 'Intervention\Image\Facades\Image',
+]);
 
 $app->withEloquent();
 
@@ -81,6 +83,7 @@ $app->routeMiddleware([
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(Intervention\Image\ImageServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*

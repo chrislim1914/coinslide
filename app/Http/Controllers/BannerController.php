@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Banner;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\PasswordEncrypt;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -123,10 +124,26 @@ class BannerController extends Controller {
      */
     public function createBanner(Request $request){
 
+        $photo = $request->file('img');
+
+        //instanciate ImageController for resize
+        $resize = new ImageController();
+        $newImage = $resize->bannerResize($photo);
+
+        //set new name for image to save on database
+        $newBannerName = 'assets/banner/'.time().'.'.$photo->getClientOriginalExtension(); 
+
+        //set directory to save the file
+        $destinationPath = $resize->public_path('/');        
+       
+        //save to image to public/assets/banner folder
+        $newImage->save($destinationPath.'/'.$newBannerName,80);
+
+        //instanciate Banner model and save the data
         $banner = new Banner();
         $banner->title = $request->title;
         $banner->description = $request->description;
-        $banner->img = $request->img;
+        $banner->img = $newBannerName;
         $banner->startdate = $request->startdate;
         $banner->enddate = $request->enddate;
         $banner->position = $request->position;
