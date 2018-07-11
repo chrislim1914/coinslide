@@ -12,8 +12,127 @@ class AdvertiseController extends Controller {
 
     /**
      * method to display list of ads
+     * 
+     * @return response
      */
     public function adsList(){
+
+        /**
+         * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
+         * 
+         * the second query is advertiese with link on subscribe table and count the subscription
+         * 
+         * then we will create a custom pagination for union query
+         */
+        $adsnosubs = DB::table('advertises')
+                        ->select('advertises.idadvertise',
+                                'advertises.idadvertisers',
+                                'advertises.adcategory',
+                                'advertises.title',
+                                'advertises.content',
+                                'advertises.url',
+                                'advertises.img',
+                                'advertises.createdate', 
+                                'advertises.startdate',
+                                'advertises.enddate',
+                                DB::raw("(0) as subscriber"))
+                        ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
+                                                            ->select('subscriptions.idadvertise')
+                        );
+
+        $adswithsubs = DB::table('advertises')
+                        ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
+                        ->select('advertises.idadvertise',
+                                'advertises.idadvertisers',
+                                'advertises.adcategory',
+                                'advertises.title',
+                                'advertises.content',
+                                'advertises.url',
+                                'advertises.img',
+                                'advertises.createdate', 
+                                'advertises.startdate',
+                                'advertises.enddate',
+                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
+                        
+                        ->union($adsnosubs)
+                        ->groupBy('advertises.idadvertise')
+                        ->orderBy('subscriber', 'DESC')
+                        ->get();
+
+        if($adswithsubs->count() > 0 ) {                
+                return response()->json($adswithsubs);
+        } else {
+            echo json_encode(
+                array("message" => "No advertise are found.")
+            );
+        }
+    }
+
+    /**
+     * method to display list of ads
+     * 
+     * @return response
+     */
+    public function bestAds(){
+
+        /**
+         * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
+         * 
+         * the second query is advertiese with link on subscribe table and count the subscription
+         * 
+         * then we will create a custom pagination for union query
+         */
+        $adsnosubs = DB::table('advertises')
+                        ->select('advertises.idadvertise',
+                                'advertises.idadvertisers',
+                                'advertises.adcategory',
+                                'advertises.title',
+                                'advertises.content',
+                                'advertises.url',
+                                'advertises.img',
+                                'advertises.createdate', 
+                                'advertises.startdate',
+                                'advertises.enddate',
+                                DB::raw("(0) as subscriber"))
+                        ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
+                                                            ->select('subscriptions.idadvertise')
+                        );
+
+        $adswithsubs = DB::table('advertises')
+                        ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
+                        ->select('advertises.idadvertise',
+                                'advertises.idadvertisers',
+                                'advertises.adcategory',
+                                'advertises.title',
+                                'advertises.content',
+                                'advertises.url',
+                                'advertises.img',
+                                'advertises.createdate', 
+                                'advertises.startdate',
+                                'advertises.enddate',
+                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
+                        
+                        ->union($adsnosubs)
+                        ->groupBy('advertises.idadvertise')
+                        ->orderBy('subscriber', 'DESC')
+                        ->limit(4)
+                        ->get();
+
+        if($adswithsubs->count() > 0 ) {                
+                return response()->json($adswithsubs);
+        } else {
+            echo json_encode(
+                array("message" => "No advertise are found.")
+            );
+        }
+    }
+
+    /**
+     * method to display list of ads by advertiser
+     * 
+     * @return response
+     */
+    public function adsListbyAdvertiser($id){
 
         //create query advertise
         $advertises = DB::table('advertises')
@@ -21,6 +140,7 @@ class AdvertiseController extends Controller {
                         'advertises.title', 'advertises.content', 'advertises.url',
                         'advertises.img', 'advertises.createdate', 'advertises.startdate',
                         'advertises.enddate' )
+                        ->where('advertises.idadvertisers', $id)
                         ->paginate(5);
 
         //the cursor method may be used to greatly reduce your memory usage:
@@ -34,6 +154,7 @@ class AdvertiseController extends Controller {
             );
         }
     }
+
 
     /**
      * method to create Ads
@@ -73,7 +194,7 @@ class AdvertiseController extends Controller {
         //find Ads info
         $advertise = Advertise::where('idadvertise', $id)->get();
 
-        if($advertise->count()){
+        if($advertise->count() > 0){
             //update ads
             $updateAdvertise = Advertise::where('idadvertise', $id);
                 if($updateAdvertise->update([

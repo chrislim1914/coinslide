@@ -31,6 +31,20 @@ class ImageController extends Controller
         }
     }
 
+    public function advertiserBannerResize($newImage){
+
+        $image = Image::make($newImage);
+
+        $imagewidth = $image->width();
+        $imageheight = $image->height();
+        
+        if($imagewidth == 1200 && $imageheight == 380) {
+            return $this->image = $image;
+        } else {
+            return $this->image = Image::make($newImage)->resize(1100, 448);
+        }
+    }
+
     
     /**
     * Return the path to public dir

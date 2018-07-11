@@ -14,8 +14,17 @@ class CreateAdvertisersTable extends Migration
     public function up()
     {
         Schema::create('advertisers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
+            $table->increments('idadvertiser');
+            $table->integer('iduser');
+            $table->string('company_name');
+            $table->string('business_registration');
+            $table->string('business_category');
+            $table->string('representative_name');
+            $table->string('representative_contactno');
+            $table->string('company_website');
+            $table->string('email')->unique();
+            $table->string('password');
+            $table->integer('delete');
         });
     }
 

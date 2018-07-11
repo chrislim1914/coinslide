@@ -24,9 +24,8 @@ $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('login/', ['middleware' => 'cors', 'uses' => 'UserController@authenticate']);
 	$router->get('User/', ['middleware' => 'cors', 'uses' => 'UserController@readUsers']);
-	$router->get('User/{id}', ['middleware' => 'cors', 'uses' => 'UserController@getUser']);
-	$router->post('User/create', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
-	$router->options('User/create', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
+	$router->post('User/create/', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
+	$router->get('User/{id}', ['middleware' => 'cors', 'uses' => 'UserController@getUser']);	
 	$router->post('User/update/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updateUser']);
 	$router->post('User/updatePassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
 	$router->post('User/Search/', ['middleware' => 'cors', 'uses' => 'UserController@searchUser']);
@@ -56,7 +55,7 @@ $router->group(['prefix' => 'api/'], function($router)
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Content/', ['middleware' => 'cors', 'uses' => 'ContentController@readAllContent']);
-	$router->get('Contentlist/', ['middleware' => 'cors', 'uses' => 'ContentController@contentPaginate']);
+	$router->get('Content/Best/', ['middleware' => 'cors', 'uses' => 'ContentController@bestContent']);
 	$router->get('Content/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@contentReadOne']);
 	$router->post('Content/Search', ['middleware' => 'cors', 'uses' => 'ContentController@searchContent']);
 	$router->post('Content/create', ['middleware' => 'cors', 'uses' => 'ContentController@createContent']);
@@ -85,7 +84,33 @@ $router->group(['prefix' => 'api/'], function($router)
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Ads/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@adsList']);
+	$router->get('Ads/Best/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@bestAds']);
 	$router->get('Ads/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
 	$router->post('Ads/create/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@createAds']);
 	$router->post('Ads/update/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@updateAds']);
+});
+
+/**
+ * API Route for Advertiser
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Advertiser/', ['middleware' => 'cors', 'uses' => 'AdvertiserController@advertiserList']);
+	$router->get('Advertiser/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@readAdvertiser']);
+	$router->post('Advertiser/create/', ['middleware' => 'cors', 'uses' => 'AdvertiserController@createAdvertiser']);
+	$router->post('Advertiser/insertPassword/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@insertPassword']);
+	$router->post('Advertiser/update/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@updateAdvertiser']);
+	//Ads list of Advertiser
+	$router->get('Advertiser/{id}/Adslist/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@adsListbyAdvertiser']);
+	//Banner list of Advertiser
+	$router->get('Advertiser/{id}/Banner/', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@bannerListbyAdvertiser']);
+	
+});
+
+$router->group(['prefix' => 'log/'], function($router)
+{
+	$router->get('glogin',array('as'=>'glogin','uses'=>'GoogleController@googleSetAuthentication')) ;
+	$router->get('google-user',array('as'=>'user.glist','uses'=>'GoogleController@listGoogleUser')) ;
 });

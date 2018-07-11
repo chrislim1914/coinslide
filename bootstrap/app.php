@@ -84,6 +84,7 @@ $app->routeMiddleware([
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(Intervention\Image\ImageServiceProvider::class);
+$app->register(\Illuminate\Mail\MailServiceProvider::class);
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*
@@ -102,6 +103,15 @@ $app->router->group([
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
 });
+
+/*
+|--------------------------------------------------------------------------
+| configure files
+|--------------------------------------------------------------------------
+*/
+$app->configure('services');
+$app->configure('mail');
+
 
 
 return $app;
