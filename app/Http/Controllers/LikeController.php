@@ -168,6 +168,7 @@ class LikeController extends Controller
                             ->select('likes.idlike', DB::raw('count(likes.islike) as `dislike`'))
                             ->where('idcontent', $id)
                             ->where('islike', 0)
+                            ->groupBy('likes.idlike')
                             ->get();
             return response()->json($countlike);
         } else {
