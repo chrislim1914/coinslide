@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateContentsTable extends Migration
+class CreateReplyTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,13 @@ class CreateContentsTable extends Migration
      */
     public function up()
     {
-        Schema::connection('mysql')->create('contents', function (Blueprint $table) {
-            $table->increments('idcontent');
-            $table->integer('user_id');
-            $table->string('title');
+        Schema::connection('mysql')->create('replies', function (Blueprint $table) {
+            $table->increments('idreply');
+            $table->integer('idcomment');
+            $table->integer('iduser');
             $table->string('content');
-            $table->string('description');
-            $table->timestampTz('createdate');
-            $table->timestamp('modifiedate');
+            $table->timestamp('createdate');
+            $table->timestamp('modifieddate');
             $table->integer('delete');
         });
     }
@@ -32,6 +31,6 @@ class CreateContentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('contents');
+        Schema::dropIfExists('replies');
     }
 }

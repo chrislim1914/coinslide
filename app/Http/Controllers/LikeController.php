@@ -35,7 +35,7 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 1])) {
                             echo json_encode(
-                                array("message" => "liked")
+                                array("message" => "like")
                             );
                         }
                         break;
@@ -53,7 +53,7 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 1])) {
                             echo json_encode(
-                                array("message" => "liked")
+                                array("message" => "like")
                             );
                         }
                         break;
@@ -62,9 +62,20 @@ class LikeController extends Controller
            }
 
         } else {
-            echo json_encode(
-                array("message" => "referrence not found.")
-            );
+            $like = new Likes();
+            $like->idcontent = $request->idcontent;
+            $like->iduser    = $request->iduser;
+            $like->islike    = 1;
+
+            if($like->save()) {
+                echo json_encode(
+                    array("message" => "like.")
+                );
+            } else {
+                echo json_encode(
+                    array("message" => "there is something wrong.")
+                );
+            }
         }
     }
 
@@ -119,9 +130,20 @@ class LikeController extends Controller
                 }                
            }
         } else {
-            echo json_encode(
-                array("message" => "referrence not found.")
-            );
+            $like = new Likes();
+            $like->idcontent = $request->idcontent;
+            $like->iduser    = $request->iduser;
+            $like->islike    = 0;
+
+            if($like->save()) {
+                echo json_encode(
+                    array("message" => "dislike.")
+                );
+            } else {
+                echo json_encode(
+                    array("message" => "there is something wrong.")
+                );
+            }
         }
     }
 

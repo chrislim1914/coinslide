@@ -13,7 +13,7 @@ class CreateAdvertiserBannersTable extends Migration
      */
     public function up()
     {
-        Schema::create('advertiser_banners', function (Blueprint $table) {
+        Schema::connection('mysql')->create('advertiser_banners', function (Blueprint $table) {
             $table->increments('idadvertiser_banner');
             $table->integer('idadvertiser');
             $table->string('img');

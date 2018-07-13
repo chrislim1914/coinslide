@@ -6,4 +6,5 @@ Homestead.yaml
 #composer.lock
 composer.lock
 #ignore assets
-public/assets/
+#public/assets/
+.gitignore

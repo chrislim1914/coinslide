@@ -13,7 +13,7 @@ class CreateAdvertisersTable extends Migration
      */
     public function up()
     {
-        Schema::create('advertisers', function (Blueprint $table) {
+        Schema::connection('mysql')->create('advertisers', function (Blueprint $table) {
             $table->increments('idadvertiser');
             $table->integer('iduser');
             $table->string('company_name');

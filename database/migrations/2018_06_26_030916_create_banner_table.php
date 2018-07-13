@@ -13,7 +13,7 @@ class CreateBannerTable extends Migration
      */
     public function up()
     {
-        Schema::create('banners', function (Blueprint $table) {
+        Schema::connection('mysql')->create('banners', function (Blueprint $table) {
             $table->increments('idbanner');
             $table->string('title');
             $table->string('description');

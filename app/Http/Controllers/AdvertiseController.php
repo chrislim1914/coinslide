@@ -53,7 +53,7 @@ class AdvertiseController extends Controller {
                                 'advertises.startdate',
                                 'advertises.enddate',
                                 DB::raw('count(subscriptions.idsubscription) as subscriber'))
-                        
+                        ->whereNull('subscriptions.enddate')
                         ->union($adsnosubs)
                         ->groupBy('advertises.idadvertise')
                         ->orderBy('subscriber', 'DESC')
@@ -62,9 +62,9 @@ class AdvertiseController extends Controller {
         if($adswithsubs->count() > 0 ) {                
                 return response()->json($adswithsubs);
         } else {
-            echo json_encode(
-                array("message" => "No advertise are found.")
-            );
+            return response()->json([
+                "message" => "No advertise are found."
+            ]);
         }
     }
 
@@ -111,7 +111,7 @@ class AdvertiseController extends Controller {
                                 'advertises.startdate',
                                 'advertises.enddate',
                                 DB::raw('count(subscriptions.idsubscription) as subscriber'))
-                        
+                        ->whereNull('subscriptions.enddate')                        
                         ->union($adsnosubs)
                         ->groupBy('advertises.idadvertise')
                         ->orderBy('subscriber', 'DESC')

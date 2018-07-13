@@ -8,15 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class Comment extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use Authenticatable, Authorizable;
 
     public $timestamps = false;
-
-    use HybridRelations;
-
-    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +20,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $fillable = [
-        'iduser', 'first_name', 'last_name', 'email', 'phone', 'nickname', 'password', 'createdate', 'delete', 'national', 'snsProviderName', 'snsProviderId',
+        'idcomment', 'idcontent', 'iduser', 'content', 'createdate', 'modifieddate', 'delete'
     ];
 
     /**

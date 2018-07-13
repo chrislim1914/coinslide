@@ -25,8 +25,10 @@ $app = new Laravel\Lumen\Application(
 
 $app->withFacades([
     'Image' => 'Intervention\Image\Facades\Image',
+    'Eloquent' => 'Illuminate\Database\Eloquent\Model',
 ]);
 
+$app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
 $app->withEloquent();
 
 /*
@@ -85,6 +87,7 @@ $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(Intervention\Image\ImageServiceProvider::class);
 $app->register(\Illuminate\Mail\MailServiceProvider::class);
+
 // $app->register(App\Providers\EventServiceProvider::class);
 
 /*

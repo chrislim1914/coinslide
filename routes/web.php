@@ -109,6 +109,54 @@ $router->group(['prefix' => 'api/'], function($router)
 	
 });
 
+/**
+ * API Route for Subcriptions
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->post('subscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscribe']);
+	$router->post('unsubscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@unapisubscribe']);
+});
+
+/**
+ * API Route for comments
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->post('Comment/post/', ['middleware' => 'cors', 'uses' => 'CommentController@postComment']);
+	$router->post('Comment/delete/', ['middleware' => 'cors', 'uses' => 'CommentController@deleteComment']);
+	$router->get('Comment/count/{id}', ['middleware' => 'cors', 'uses' => 'CommentController@countComment']);
+	$router->get('Comment/{id}', ['middleware' => 'cors', 'uses' => 'CommentController@loadComment']);
+});
+
+/**
+ * API Route for reply
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->post('Reply/post/', ['middleware' => 'cors', 'uses' => 'ReplyController@postReply']);
+	$router->post('Reply/delete/', ['middleware' => 'cors', 'uses' => 'ReplyController@deleteReply']);
+	$router->get('Reply/count/{id}', ['middleware' => 'cors', 'uses' => 'ReplyController@countReply']);
+	$router->get('Reply/{id}', ['middleware' => 'cors', 'uses' => 'ReplyController@loadReply']);
+});
+
+/**
+ * API Route for userinfo mongodb
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Userinfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@all']);
+	$router->get('Userinfo/try', ['middleware' => 'cors', 'uses' => 'UserinfoController@try']);
+});
+
 $router->group(['prefix' => 'log/'], function($router)
 {
 	$router->get('glogin',array('as'=>'glogin','uses'=>'GoogleController@googleSetAuthentication')) ;
