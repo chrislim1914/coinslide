@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Reply;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Http\Controllers\DateTimeController;
 
 class ReplyController extends Controller {
 
@@ -111,18 +111,48 @@ class ReplyController extends Controller {
      */
     public function loadReply($idcomment){
 
+        $current = new DateTimeController();
+
         //load replies
         $reply = Reply::where('replies.idcomment', $idcomment)
                         ->where('replies.delete', 0)
                         ->orderBy('replies.idreply', 'DESC')
                         ->get();
 
-        if($reply->count() > 0 ){
-            return response()->json($reply);
+        $cursor = $reply;
+
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
+        if($cursor->count() > 0 ) {    
+            foreach($cursor as $new){
+                $idreply      = $new->idreply;
+                $idcomment    = $new->idcomment;
+                $iduser       = $new->iduser;
+                $content      = $new->content;
+                $createdate   = $new->createdate;
+                $modifieddate = $new->modifieddate;
+                $timelapse    = $current->timeLapse($new->createdate);
+
+                $array[] = [
+                    'idreply'     => $idreply,
+                    'idcomment'   => $idcomment,
+                    'iduser'      => $iduser,
+                    'content'     => $content,
+                    'createdate'  => $createdate,
+                    'modifieddate'=> $modifieddate,
+                    'timelapse'   => $timelapse
+                ];
+            }
+            
+            return response()->json($array);
         } else {
-            return response()->json([
-                "message" => "no reply yet!"
-            ]);
+            echo json_encode(
+                array("message" => "No Replies are found.")
+            );
         }
     }    
 }

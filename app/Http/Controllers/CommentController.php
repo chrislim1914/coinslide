@@ -6,6 +6,7 @@ use App\Comment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use App\Http\Controllers\DateTimeController;
 
 
 class CommentController extends Controller {
@@ -111,6 +112,9 @@ class CommentController extends Controller {
      * @return response 
      */
     public function loadComment($idcontent){
+
+        $current = new DateTimeController();
+
         //load comments
         $comment = DB::table('comments')
                         ->select('comments.idcomment',
@@ -124,12 +128,40 @@ class CommentController extends Controller {
                         ->orderBy('comments.idcomment', 'DESC')
                         ->get();
 
-        if($comment->count() > 0 ){
-            return response()->json($comment);
+        $cursor = $comment;
+
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
+        if($cursor->count() > 0 ) {    
+            foreach($cursor as $new){
+                $idcomment      = $new->idcomment;
+                $idcontent      = $new->idcontent;
+                $iduser       = $new->iduser;
+                $content        = $new->content;
+                $createdate     = $new->createdate;
+                $modifieddate   = $new->modifieddate;
+                $timelapse      = $current->timeLapse($new->createdate);
+
+                $array[] = [
+                    'idcomment'     => $idcomment,
+                    'idcontent'       => $idcontent,
+                    'iduser'      => $iduser,
+                    'content'       => $content,
+                    'createdate'    => $createdate,
+                    'modifieddate'  => $modifieddate,
+                    'timelapse'     => $timelapse
+                ];
+            }
+            
+            return response()->json($array);
         } else {
-            return response()->json([
-                "message" => "no comments yet!"
-            ]);
+            echo json_encode(
+                array("message" => "No Comments are found.")
+            );
         }
     }
 }

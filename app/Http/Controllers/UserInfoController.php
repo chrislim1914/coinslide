@@ -20,9 +20,9 @@ class UserinfoController extends Controller {
         
         $userinfo = DB::connection('mongodb')->collection('userinformations')
                         ->get();
-        print_r($userinfo);
+
         $user = DB::table('users')
-                ->join($userinfo, 'users.iduser', '=', 'iduser')
+                //->join($userinfo, 'users.iduser', '=', 'iduser')
                 ->select('users.iduser','users.nickname')
                 ->get();
 

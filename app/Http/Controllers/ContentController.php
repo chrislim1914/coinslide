@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
+use App\Http\Controllers\DateTimeController;
 
 class ContentController extends Controller {
 
@@ -20,6 +21,8 @@ class ContentController extends Controller {
      */
     public function readAllContent(){
 
+        $current = new DateTimeController();
+
         $nolike = DB::table('contents')
                         ->join('users','contents.user_id', '=', 'users.iduser')
                         ->select('contents.idcontent',
@@ -30,7 +33,6 @@ class ContentController extends Controller {
                                 'contents.description',
                                 'contents.createdate',
                                 'contents.modifieddate',
-                                DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as `timelapse`"),
                                 'contents.delete',
                                 DB::raw("(1) as `islike`"),
                                 DB::raw("(0) as `like`")
@@ -51,7 +53,6 @@ class ContentController extends Controller {
                                 'contents.description',
                                 'contents.createdate',
                                 'contents.modifieddate',
-                                DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as `timelapse`"),
                                 'contents.delete',
                                 DB::raw("(1) as `islike`"),
                                 DB::raw('count(likes.idlike) as `like`')
@@ -65,9 +66,45 @@ class ContentController extends Controller {
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $withlike;
-                                        
+        
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
         if($cursor->count() > 0 ) {    
-            return response()->json($cursor);
+            foreach($cursor as $new){
+                $idcontent      = $new->idcontent;
+                $user_id        = $new->user_id;
+                $nickname       = $new->nickname;
+                $title          = $new->title;
+                $content        = $new->content;
+                $description    = $new->description;
+                $createdate     = $new->createdate;
+                $modifieddate   = $new->modifieddate;
+                $timelapse      = $current->timeLapse($new->createdate);
+                $delete         = $new->delete;
+                $islike         = $new->islike;
+                $like           = $new->like;
+
+                $array[] = [
+                    'idcontent'     => $idcontent,
+                    'user_id'       => $user_id,
+                    'nickname'      => $nickname,
+                    'title'         => $title,
+                    'content'       => $content,
+                    'description'   => $description,
+                    'createdate'    => $createdate,
+                    'modifieddate'  => $modifieddate,
+                    'timelapse'     => $timelapse,
+                    'delete'        => $delete,
+                    'islike'        => $islike,
+                    'like'          => $like
+                ];
+            }
+            
+            return response()->json($array);
         } else {
             echo json_encode(
                 array("message" => "No Content are found.")
@@ -83,6 +120,8 @@ class ContentController extends Controller {
      */
     public function bestContent(){
 
+        $current = new DateTimeController();
+
         $nolike = DB::table('contents')
                         ->join('users','contents.user_id', '=', 'users.iduser')
                         ->select('contents.idcontent',
@@ -93,7 +132,6 @@ class ContentController extends Controller {
                                 'contents.description',
                                 'contents.createdate',
                                 'contents.modifieddate',
-                                DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as `timelapse`"),
                                 'contents.delete',
                                 DB::raw("(1) as `islike`"),
                                 DB::raw("(0) as `like`")
@@ -114,7 +152,6 @@ class ContentController extends Controller {
                                 'contents.description',
                                 'contents.createdate',
                                 'contents.modifieddate',
-                                DB::raw("'".$this->timeLapse(strtotime('contents.createdate'))."' as `timelapse`"),
                                 'contents.delete',
                                 DB::raw("(1) as `islike`"),
                                 DB::raw('count(likes.idlike) as `like`')
@@ -129,9 +166,45 @@ class ContentController extends Controller {
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $withlike;
-                                        
+        
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
         if($cursor->count() > 0 ) {    
-            return response()->json($cursor);
+            foreach($cursor as $new){
+                $idcontent      = $new->idcontent;
+                $user_id        = $new->user_id;
+                $nickname       = $new->nickname;
+                $title          = $new->title;
+                $content        = $new->content;
+                $description    = $new->description;
+                $createdate     = $new->createdate;
+                $modifieddate   = $new->modifieddate;
+                $timelapse      = $current->timeLapse($new->createdate);
+                $delete         = $new->delete;
+                $islike         = $new->islike;
+                $like           = $new->like;
+
+                $array[] = [
+                    'idcontent'     => $idcontent,
+                    'user_id'       => $user_id,
+                    'nickname'      => $nickname,
+                    'title'         => $title,
+                    'content'       => $content,
+                    'description'   => $description,
+                    'createdate'    => $createdate,
+                    'modifieddate'  => $modifieddate,
+                    'timelapse'     => $timelapse,
+                    'delete'        => $delete,
+                    'islike'        => $islike,
+                    'like'          => $like
+                ];
+            }
+            
+            return response()->json($array);
         } else {
             echo json_encode(
                 array("message" => "No Content are found.")
@@ -284,6 +357,13 @@ class ContentController extends Controller {
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $content;
 
+        /**
+         * take the Date and Time Controller to set current date
+         * 
+         * then use the timelapse function
+         */
+        $current = new DateTimeController();
+
         if($cursor->count() > 0 ) {                   
             foreach($cursor as $new) {
                 return response()->json([
@@ -295,7 +375,7 @@ class ContentController extends Controller {
                     'description' => $new->description,
                     'createdate' => $new->createdate,
                     'modifieddate' => $new->modifieddate,
-                    'timelapse' => $this->timeLapse($new->createdate),
+                    'timelapse' => $current->timeLapse($new->createdate),
                     'delete' => $new->delete,
                 ]);                
             }
@@ -305,38 +385,5 @@ class ContentController extends Controller {
             );
         }
         
-    }
-
-    /**
-     * method to compute time lapse against createdate in contents table
-     * 
-     * @return $timelapse
-     */
-    public function timeLapse($timelapse){
-
-        //create current time using Carbon
-        $current = Carbon::now();
-
-        //parse the date in the database to carbon format
-        $timelapse = Carbon::parse($timelapse);
-
-        // Set the timezone via DateTimeZone instance or string
-        $current->timezone = new \DateTimeZone('Asia/Manila');
-
-        if($timelapse->diffInSeconds($current) <= 59) {
-            return $timelapse =  'just now';
-        } elseif($timelapse->diffInMinutes($current) <= 59) {
-            return $timelapse->diffInMinutes($current) . ' minutes ago';
-        } elseif($timelapse->diffInHours($current) <= 12) {
-            return $timelapse->diffInHours($current). ' hours ago';
-        } elseif($timelapse->diffInDays($current) <= 6) {
-            return $timelapse->diffInDays($current). ' days ago';
-        } elseif($timelapse->diffInWeeks($current) <= 4){
-            return $timelapse->diffInWeeks($current). ' weeks ago';
-        } elseif($timelapse->diffInMonths($current) <= 12){
-            return $timelapse->diffInMonths($current). ' Months ago';
-        } else {
-            return $timelapse->diffInYears($current). ' years ago';
-        }
     }
 }
