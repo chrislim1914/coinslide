@@ -31,7 +31,7 @@ class DateTimeController extends Controller
      * @return $timelapse
      */
     public function timeLapse($timelapse){
-        //parse the date in the database to carbon format
+        
         $timelapse = Carbon::parse($timelapse);        
 
         $current = $this->setDatetime();

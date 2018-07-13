@@ -88,7 +88,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * method to find user and not soft deleted
+     * method to find user
      * 
      * @param $iduser
      * @return bool
@@ -108,7 +108,7 @@ class SubscriptionController extends Controller
     }
 
     /**
-     * method to find user and not soft deleted
+     * method to find user
      * 
      * @param $idadvertise
      * @return bool
@@ -123,6 +123,29 @@ class SubscriptionController extends Controller
             return true;
         } else {
             return false;
+        }
+    }
+
+    /**
+     * method to read all subscription filter by user
+     * 
+     * @param $iduser
+     * 
+     * @return response
+     */
+    private function subscriptionList($iduser){
+
+        $sublist = DB::table('subscriptions')
+                        ->join()
+                        ->join()
+                        ->select()
+                        ->whereNull('subscriptions.enddate')
+                        ->get();
+        
+        if($sublist->count() > 0 ){
+            return response()->json($sublist);
+        } else {
+            return response()->json([]);
         }
     }
 
