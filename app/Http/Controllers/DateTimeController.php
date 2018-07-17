@@ -39,17 +39,23 @@ class DateTimeController extends Controller
         if($timelapse->diffInSeconds($current) <= 59) {
             return $timelapse =  'just now';
         } elseif($timelapse->diffInMinutes($current) <= 59) {
-            return $timelapse->diffInMinutes($current) . ' minutes ago';
+            $left = $timelapse->diffInMinutes($current);
+            return ($left == 1 ? $left. ' minute ago' :  $left. ' minutes ago');
         } elseif($timelapse->diffInHours($current) <= 12) {
-            return $timelapse->diffInHours($current). ' hours ago';
+            $left = $timelapse->diffInHours($current);
+            return ($left == 1 ? $left. ' hour ago' :  $left. ' hours ago');
         } elseif($timelapse->diffInDays($current) <= 6) {
-            return $timelapse->diffInDays($current). ' days ago';
+            $left = $timelapse->diffInDays($current);
+            return ($left == 1 ? $left. ' day ago' :  $left. ' days ago');
         } elseif($timelapse->diffInWeeks($current) <= 4){
-            return $timelapse->diffInWeeks($current). ' weeks ago';
+            $left = $timelapse->diffInWeeks($current);
+            return ($left == 1 ? $left. ' week ago' :  $left. ' weeks ago');
         } elseif($timelapse->diffInMonths($current) <= 12){
-            return $timelapse->diffInMonths($current). ' Months ago';
+            $left = $timelapse->diffInMonths($current);
+            return ($left == 1 ? $left. ' month ago' :  $left. ' months ago');
         } else {
-            return $timelapse->diffInYears($current). ' years ago';
+            $left = $timelapse->diffInYears($current);
+            return ($left == 1 ? $left. ' year ago' :  $left. ' years ago');
         }
     }
 }

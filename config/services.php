@@ -12,8 +12,14 @@
     |
     */
 return [
-    // 'mailgun' => [
-    //     'domain' => env('MAILGUN_DOMAIN'),
-    //     'secret' => env('MAILGUN_SECRET'),
-    // ],
+    'mailgun' => [
+        'domain' => env('MAILGUN_DOMAIN'),
+        'secret' => env('MAILGUN_SECRET'),
+    ],
+    
+    'google' => [
+        'client_id' => env('GOOGLE_CLIENTID'),
+        'client_secret' => env('GOOGLE_SECRET'),
+        'redirect' => 'http://localhost:8900/google/callback'
+    ]
 ];

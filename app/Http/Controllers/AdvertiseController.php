@@ -115,7 +115,7 @@ class AdvertiseController extends Controller {
                         ->union($adsnosubs)
                         ->groupBy('advertises.idadvertise')
                         ->orderBy('subscriber', 'DESC')
-                        ->limit(4)
+                        ->limit(8)
                         ->get();
 
         if($adswithsubs->count() > 0 ) {                
@@ -141,7 +141,7 @@ class AdvertiseController extends Controller {
                         'advertises.img', 'advertises.createdate', 'advertises.startdate',
                         'advertises.enddate' )
                         ->where('advertises.idadvertisers', $id)
-                        ->paginate(5);
+                        ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $advertises;

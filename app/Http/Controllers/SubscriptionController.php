@@ -7,8 +7,8 @@ use App\User;
 use App\Advertise;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
-
+use App\Http\Controllers\DateTimeController;
+use Illuminate\Support\Facades\DB;
 
 class SubscriptionController extends Controller
 {
@@ -22,13 +22,15 @@ class SubscriptionController extends Controller
      */
     public function subscribe(Request $request){
 
+        $current = new DateTimeController();
+
         if($this->findUser($request->iduser)){
             if($this->findAds($request->idadvertise)){
 
                 $subscribe = new Subscriptions();
                 $subscribe->iduser = $request->iduser;
                 $subscribe->idadvertise = $request->idadvertise;
-                $subscribe->startdate = $this->currentDatetime();
+                $subscribe->startdate = $current->setDatetime();
 
                 if($subscribe->save()) {
                     return response()->json([
@@ -62,6 +64,8 @@ class SubscriptionController extends Controller
      */
     public function unSubscribe(Request $request){
 
+        $current = new DateTimeController();
+
         $check = Subscriptions::where('iduser', $request->iduser)
                                 ->where('idadvertise', $request->idadvertise)
                                 ->where('enddate', null)
@@ -70,7 +74,7 @@ class SubscriptionController extends Controller
         if($check->count() > 0 ){
             foreach($check as $new){
                 $unsubscribe = Subscriptions::where('idsubscription', $new->idsubscription);
-                if($unsubscribe->update(["enddate" => $this->currentDatetime()])) {
+                if($unsubscribe->update(["enddate" => $current->setDatetime()])) {
                     return response()->json([
                         "message" => "unsubscribe!"
                     ]);
@@ -133,13 +137,22 @@ class SubscriptionController extends Controller
      * 
      * @return response
      */
-    private function subscriptionList($iduser){
+    public function subscriptionList($iduser){
 
         $sublist = DB::table('subscriptions')
-                        ->join()
-                        ->join()
-                        ->select()
+                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->select('subscriptions.idsubscription',
+                        'subscriptions.iduser',
+                        'subscriptions.idadvertise',
+                        'advertises.idadvertisers',
+                        'advertises.adcategory',
+                        'advertises.title',
+                        'advertises.content',
+                        'advertises.img')
+                        ->where('subscriptions.iduser', $iduser)
+                        ->whereNull('advertises.enddate')
                         ->whereNull('subscriptions.enddate')
+                        ->orderBy('advertises.title', 'ASC')
                         ->get();
         
         if($sublist->count() > 0 ){
@@ -149,13 +162,61 @@ class SubscriptionController extends Controller
         }
     }
 
-    public function currentDatetime(){
-        //create current time using Carbon
-        $current = Carbon::now();
+    /**
+     * method to read all recent subscription filter by user
+     * 
+     * @param $iduser
+     * 
+     * @return response
+     */
+    public function recentSubscriptionList($iduser){
 
-        // Set the timezone via DateTimeZone instance or string
-        $current->timezone = new \DateTimeZone(getenv('APP_TIMEZONE'));
+        $sublist = DB::table('subscriptions')
+                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->select('subscriptions.idsubscription',
+                        'subscriptions.iduser',
+                        'subscriptions.idadvertise',
+                        'advertises.idadvertisers',
+                        'advertises.adcategory',
+                        'advertises.title',
+                        'advertises.content',
+                        'advertises.img')
+                        ->where('subscriptions.iduser', $iduser)
+                        ->whereNull('advertises.enddate')
+                        ->whereNull('subscriptions.enddate')
+                        ->orderBy('subscriptions.startdate', 'DESC')
+                        ->get();
+        
+        if($sublist->count() > 0 ){
+            return response()->json($sublist);
+        } else {
+            return response()->json([]);
+        }
+    }
 
-        return $current;
+    public function subscriptionHistory($iduser){
+        $sublist = DB::table('subscriptions')
+                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->select('subscriptions.idsubscription',
+                        'subscriptions.iduser',
+                        'subscriptions.idadvertise',
+                        'advertises.idadvertisers',
+                        'advertises.adcategory',
+                        'advertises.title',
+                        'advertises.content',
+                        'advertises.img',
+                        'subscriptions.startdate as subscriptionstart',
+                        'subscriptions.enddate as subscriptionend',
+                        'advertises.startdate as adsstart',
+                        'advertises.enddate as adsend')
+                        ->where('subscriptions.iduser', $iduser)
+                        ->orderBy('subscriptions.startdate', 'DESC')
+                        ->get();
+        
+        if($sublist->count() > 0 ){
+            return response()->json($sublist);
+        } else {
+            return response()->json([]);
+        }
     }
 }

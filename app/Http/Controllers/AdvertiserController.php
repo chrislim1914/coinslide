@@ -21,10 +21,10 @@ class AdvertiserController extends Controller {
         $advertisers = DB::table('advertisers')
                         ->select('advertisers.idadvertiser', 'advertisers.iduser', 'advertisers.company_name',
                         'advertisers.business_registration', 'advertisers.business_category', 'advertisers.representative_name',
-                        'advertisers.representative_contactno', 'advertisers.company_website', 'advertisers.email', 
-                        'advertisers.business_regis_cert', 'advertisers.password', 'advertisers.delete' )
+                        'advertisers.representative_contactno', 'advertisers.company_website', 'advertisers.email',
+                        'advertisers.password', 'advertisers.delete' )
                         ->where('advertisers.delete', 0)
-                        ->paginate(5);
+                        ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $advertisers;

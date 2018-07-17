@@ -26,6 +26,7 @@ $app = new Laravel\Lumen\Application(
 $app->withFacades([
     'Image' => 'Intervention\Image\Facades\Image',
     'Eloquent' => 'Illuminate\Database\Eloquent\Model',
+    'Socialite' => 'Laravel\Socialite\Facades\Socialite::class',
 ]);
 
 $app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
@@ -70,6 +71,7 @@ $app->singleton(
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
     'cors' => App\Http\Middleware\CorsMiddleware::class,
+    'web' => \Illuminate\Session\Middleware\StartSession::class,
 ]);
 
 /*
@@ -85,8 +87,10 @@ $app->routeMiddleware([
 
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
+$app->register(App\Providers\EventServiceProvider::class);
 $app->register(Intervention\Image\ImageServiceProvider::class);
 $app->register(\Illuminate\Mail\MailServiceProvider::class);
+$app->register(\SocialiteProviders\Manager\ServiceProvider::class);
 
 // $app->register(App\Providers\EventServiceProvider::class);
 

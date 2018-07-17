@@ -14,8 +14,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
     public $timestamps = false;
 
-    use HybridRelations;
-
     protected $connection = 'mysql';
 
     /**

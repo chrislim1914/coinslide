@@ -161,7 +161,7 @@ class ContentController extends Controller {
                         ->union($nolike)
                         ->groupBy('contents.idcontent')
                         ->orderBy('like', 'DESC')
-                        ->limit(4)
+                        ->limit(8)
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:

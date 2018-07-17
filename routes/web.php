@@ -12,7 +12,7 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+	return $router->app->version();
 });
 
 /**
@@ -116,8 +116,11 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->post('subscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscribe']);
-	$router->post('unsubscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@unapisubscribe']);
+	$router->post('Subscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscribe']);
+	$router->post('Unsubscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@unsubscribe']);
+	$router->get('Subcriptionllist/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscriptionList']);
+	$router->get('Recent/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@recentSubscriptionList']);
+	$router->get('Subscription/History/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscriptionHistory']);
 });
 
 /**
@@ -157,8 +160,10 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->get('Userinfo/try', ['middleware' => 'cors', 'uses' => 'UserinfoController@try']);
 });
 
-$router->group(['prefix' => 'log/'], function($router)
+$router->group(['prefix' => '/'], function($router)
 {
 	$router->get('glogin',array('as'=>'glogin','uses'=>'GoogleController@googleSetAuthentication')) ;
 	$router->get('google-user',array('as'=>'user.glist','uses'=>'GoogleController@listGoogleUser')) ;
+	$router->get('google', ['middleware' => 'cors', 'uses' => 'GoogleController@redirectToProvider']);		
+	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'GoogleController@handleProviderCallback']);
 });

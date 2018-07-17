@@ -21,7 +21,7 @@ class Advertiser extends Model implements AuthenticatableContract, AuthorizableC
      */
     protected $fillable = [
         'idadvertiser', 'iduser', 'company_name', 'business_registration', 'business_category', 'representative_name', 
-        'representative_contactno', 'company_website', 'email', 'business_regis_cert', 'password', 'delete'
+        'representative_contactno', 'company_website', 'email', 'password', 'delete'
     ];
 
 }
