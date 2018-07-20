@@ -19,11 +19,6 @@ class UserController extends Controller
     */ 
    public function authenticate(Request $request){
  
-        $this->validate($request, [ 
-            'email' => 'required', 
-            'password' => 'required' 
-            ]);
-
         $user = User::where('email', $request->email)->first();
 
         $hash = new PasswordEncrypt();
@@ -313,6 +308,41 @@ class UserController extends Controller
             echo json_encode(
                 array("message" => "User not found.")
             );           
+        }
+    }
+
+    /**
+     * method to save password for new Client registered via SNS
+     * 
+     * @param Request $request, $id id of client
+     * 
+     * @return response
+     */
+    public function savePassword(Request $request, $id){
+
+        //get the user info first
+        $Users  = User::where('iduser', $id)
+                        ->where('delete', 0)
+                        ->get();
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $Users;
+        
+        if($cursor->count() > 0 ) {
+
+            //instantiate PasswordEncrypt
+            $hash = new PasswordEncrypt();           
+            
+                //update password
+                $updateUser = User::where('iduser', $id);
+                $updateUser->update(['password' => $hash->hash($request->password)]);
+                echo json_encode(
+                    array("message" => "User password is set.")
+                ); 
+        } else {
+            echo json_encode(
+                array("message" => "User not found.")
+            );
         }
     }
 }

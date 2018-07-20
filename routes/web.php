@@ -12,7 +12,8 @@
 */
 
 $router->get('/', function () use ($router) {
-	return $router->app->version();
+	//return $router->app->version();
+	return view('sample');
 });
 
 /**
@@ -30,6 +31,7 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->post('User/updatePassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
 	$router->post('User/Search/', ['middleware' => 'cors', 'uses' => 'UserController@searchUser']);
 	$router->post('User/delete/{id}', ['middleware' => 'cors', 'uses' => 'UserController@deleteUser']);	
+	$router->post('User/setPassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@savePassword']);	
 });
 
 /**
@@ -157,13 +159,12 @@ $router->group(['prefix' => 'api/'], function($router)
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Userinfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@all']);
-	$router->get('Userinfo/try', ['middleware' => 'cors', 'uses' => 'UserinfoController@try']);
+	$router->get('Userinfo/try/{id}', ['middleware' => 'cors', 'uses' => 'UserinfoController@try']);
 });
 
 $router->group(['prefix' => '/'], function($router)
 {
-	$router->get('glogin',array('as'=>'glogin','uses'=>'GoogleController@googleSetAuthentication')) ;
-	$router->get('google-user',array('as'=>'user.glist','uses'=>'GoogleController@listGoogleUser')) ;
 	$router->get('google', ['middleware' => 'cors', 'uses' => 'GoogleController@redirectToProvider']);		
 	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'GoogleController@handleProviderCallback']);
+	$router->get('google/register/', ['middleware' => 'cors', 'uses' => 'GoogleController@register']);
 });
