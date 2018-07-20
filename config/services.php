@@ -21,5 +21,28 @@ return [
         'client_id' => env('GOOGLE_CLIENTID'),
         'client_secret' => env('GOOGLE_SECRET'),
         'redirect' => 'http://localhost:8900/google/callback'
-    ]
+    ],
+
+    'facebook_config' => [
+        'app_id' => env('FACEBOOK_APP_ID'),
+        'app_secret' => env('FACEBOOK_APP_SECRET'),
+        'default_graph_version' => 'v2.10'
+    ],
+
+    /*
+     * The default list of permissions that are
+     * requested when authenticating a new user with your app.
+     * The fewer, the better! Leaving this empty is the best.
+     * You can overwrite this when creating the login link.
+     *
+     * Example:
+     *
+     * 'default_scope' => ['email', 'user_birthday'],
+     *
+     * For a full list of permissions see:
+     *
+     * https://developers.facebook.com/docs/facebook-login/permissions
+     */
+    'default_scope' => ['email']
+    
 ];

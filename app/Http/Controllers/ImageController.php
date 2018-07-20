@@ -45,6 +45,20 @@ class ImageController extends Controller
         }
     }
 
+    public function profilephotoResize($newImage){
+
+        $image = Image::make($newImage);
+
+        $imagewidth = $image->width();
+        $imageheight = $image->height();
+        
+        if($imagewidth == 300 && $imageheight == 300) {
+            return $this->image = $image;
+        } else {
+            return $this->image = Image::make($newImage)->resize(300, 300);
+        }
+    }
+
     
     /**
     * Return the path to public dir

@@ -7,6 +7,7 @@ use App\Http\Controllers\PasswordEncrypt;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 
 class UserController extends Controller
@@ -65,33 +66,28 @@ class UserController extends Controller
      */    
     public function getUser($id){
 
-        $Users  = User::all()
-                        ->where('iduser', $id)
-                        ->where('delete', 0);
-        
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $Users;
-        
-        if($cursor->count() > 0 ) {
-            foreach ($cursor as $User) {
-                return response()->json([   
-                        'iduser'            => $id, 
-                        'first_name'        => $User->first_name,
-                        'last_name'         => $User->last_name,
-                        'email'             => $User->email,
-                        'phone'             => $User->phone,
-                        'nickname'          => $User->nickname,
-                        'createdate'        => $User->createdate,
-                        'national'          => $User->national,
-                        'snsProviderName'   => $User->snsProviderName,
-                        'snsProviderId'     => $User->snsProviderId
-                ]);
-            }            
-        } else {
-            echo json_encode(
-                array("message" => "User not found.")
-            );
-        }
+        //we convert the $id to integer
+        $iduser = intval($id);
+
+        $userinfo = DB::connection('mongodb')->collection('userinformations')
+                        ->where('iduser', '=', $iduser)
+                        ->get();
+
+        $user = DB::table('users')
+                //->join($userinfo, 'users.iduser', '=', 'iduser')
+                ->select('users.iduser',
+                        'users.first_name',
+                        'users.last_name',
+                        'users.email',
+                        'users.phone',
+                        'users.nickname',
+                        'users.createdate',
+                        'users.delete',
+                        'users.national')
+                ->where('users.iduser', $id)
+                ->get();
+        $collection = $userinfo->merge($user);
+        return response()->json($collection);
     }
 
     /**

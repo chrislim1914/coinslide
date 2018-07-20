@@ -9,23 +9,17 @@ use App\Http\Controllers\Controller;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SammyK\LaravelFacebookSdk\LaravelFacebookSdk as LaravelFacebookSdk;
 
-class GoogleController extends Controller
+class SnsController extends Controller
 {
-    public $googleUser;
-    public $first_name;
-    public $last_name;
-    public $email;
-    public $nickname;
-    public $snsProviderId;
-    public $photo;
     /**
      * method to call SocialiteProdivers to get Google account authentication
      * 
      * using stateless for we use lumen that does'nt support any session
      * and its stateless
      */  
-    public function redirectToProvider(){
+    public function redirectToGoogle(){
 
         return Socialite::driver('google')->stateless()->redirect();
     }
@@ -37,7 +31,7 @@ class GoogleController extends Controller
      * 
      * @return response
      */
-    public function handleProviderCallback(){
+    public function googleCallback(){
 
         $user = Socialite::driver('google')->user(); 
 
@@ -77,8 +71,12 @@ class GoogleController extends Controller
         if($save->save()) {
             
             $userinfo = new UserInfo();
-            $userinfo->iduser = $lastId = $save->id;
+            $userinfo->iduser       = $lastId = $save->id;
+            $userinfo->gender       = '';
             $userinfo->profilephoto = $photo;
+            $userinfo->birth        = '';
+            $userinfo->city         = '';
+            $userinfo->mStatus      = '';
 
             if($userinfo->save()){
                 return response()->json([
@@ -90,5 +88,9 @@ class GoogleController extends Controller
                 "message" => "failed to save information"
             ]);
         }
-    }    
+    }
+    
+    public function redirectToFacebook(LaravelFacebookSdk $fb){
+        $login_url = $fb->getLoginUrl(['email']);
+    }
 }

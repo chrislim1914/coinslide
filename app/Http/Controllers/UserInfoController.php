@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\UserInfo;
 use App\User;
-use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-
+use Illuminate\Http\Request;
+use App\Http\Controllers\ImageController;
+use Illuminate\Support\Facades\DB;
 
 class UserinfoController extends Controller {
 
@@ -21,21 +22,61 @@ class UserinfoController extends Controller {
         return response()->json($userinfo);
     }
 
-    public function try($id){        
+    /**
+     * method to update Userinformations collection
+     * 
+     * @param Request $request $id
+     * 
+     * @return response
+     */
+    public function updateUserInfo(Request $request){        
         
-        //we convert the $id to integer
-        $iduser = intval($id);
+        $iduser = intval($request->iduser);
+        //check first if user exist
+        $userinfo = UserInfo::where('iduser', $iduser)
+                            ->get();
 
-        $userinfo = DB::connection('mongodb')->collection('userinformations')
-                        ->where('iduser', '=', $iduser)
-                        ->get();
+        if($userinfo->count() > 0){
+            //get the image file
+            $photo = $request->file('image');
 
-        $user = DB::table('users')
-                //->join($userinfo, 'users.iduser', '=', 'iduser')
-                ->select('users.iduser','users.nickname')
-                ->where('users.iduser', $id)
-                ->get();
-        $collection = $userinfo->merge($user);
-        return response()->json($collection);
+            //instanciate ImageController for resize
+            $resize = new ImageController();
+            $newImage = $resize->profilephotoResize($photo);
+
+            //set new name for image to save on database
+            $newName = 'assets/profile/'.time().'.'.$photo->getClientOriginalExtension(); 
+
+            //set directory to save the file
+            $destinationPath = $resize->public_path('/');        
+            
+            //save to image to public/assets/banner folder
+            $newImage->save($destinationPath.'/'.$newName,80);
+            
+            //update userinformation with parameter
+            $saveUser = DB::connection('mongodb')->collection('userinformations')
+                        ->where('iduser', '=', $iduser);
+
+            //execute update
+            if($saveUser->update([
+                            'gender'       => $request->gender,
+                            'profilephoto' => $newName,
+                            'birth'        => $request->birth,
+                            'city'         => $request->city,
+                            'mStatus'      => $request->mStatus
+                        ])) {
+                return response()->json([
+                    "message" => "User information saved!"
+                ]);
+            } else {
+                return response()->json([
+                    "message" => "failed to save user information!"
+                ]);
+            }
+        } else {
+            return response()->json([
+                "message" => "User Information not found."
+            ]);
+        }
     }
 }

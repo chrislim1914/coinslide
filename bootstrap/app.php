@@ -27,6 +27,7 @@ $app->withFacades([
     'Image' => 'Intervention\Image\Facades\Image',
     'Eloquent' => 'Illuminate\Database\Eloquent\Model',
     'Socialite' => 'Laravel\Socialite\Facades\Socialite::class',
+    'Facebook' => SammyK\LaravelFacebookSdk\FacebookFacade::class,
 ]);
 
 $app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
@@ -89,7 +90,8 @@ $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
 $app->register(Intervention\Image\ImageServiceProvider::class);
 $app->register(\Illuminate\Mail\MailServiceProvider::class);
- $app->register(\SocialiteProviders\Manager\ServiceProvider::class);
+$app->register(\SocialiteProviders\Manager\ServiceProvider::class);
+$app->register(SammyK\LaravelFacebookSdk\LaravelFacebookSdkServiceProvider::class);
 //$app->register(Laravel\Socialite\SocialiteServiceProvider::class);
 
 // $app->register(App\Providers\EventServiceProvider::class);
