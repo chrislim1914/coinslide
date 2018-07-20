@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
+use App\Http\Controllers\DateTimeController;
 
 class AdvertiseController extends Controller {
 
@@ -17,6 +18,7 @@ class AdvertiseController extends Controller {
      */
     public function adsList(){
 
+        $current = new DateTimeController();
         /**
          * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
          * 
@@ -58,13 +60,50 @@ class AdvertiseController extends Controller {
                         ->groupBy('advertises.idadvertise')
                         ->orderBy('subscriber', 'DESC')
                         ->get();
+        $cursor = $adswithsubs;
 
-        if($adswithsubs->count() > 0 ) {                
-                return response()->json($adswithsubs);
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
+        if($cursor->count() > 0 ) {    
+            foreach($cursor as $new){
+                $idadvertise    = $new->idadvertise;
+                $idadvertisers  = $new->idadvertisers;
+                $adcategory     = $new->adcategory;
+                $title          = $new->title;
+                $content        = $new->content;
+                $url            = $new->url;
+                $img            = $new->img;
+                $createdate     = $new->createdate;
+                $startdate      = $new->startdate;
+                $enddate        = $new->enddate;
+                $timelapse      = $current->timeLapse($new->startdate);                
+                $subscriber     = $new->subscriber;
+
+                $array[] = [
+                    'idadvertise'       => $idadvertise,
+                    'idadvertisers'     => $idadvertisers,
+                    'adcategory'        => $adcategory,
+                    'title'             => $title,
+                    'content'           => $content,
+                    'url'               => $url,
+                    'img'               => $img,
+                    'createdate'        => $createdate,
+                    'startdate'         => $startdate,
+                    'enddate'           => $enddate,
+                    'timelapse'         => $timelapse,                    
+                    'subscriber'        => $subscriber
+                ];
+            }
+            
+            return response()->json($array);
         } else {
-            return response()->json([
-                "message" => "No advertise are found."
-            ]);
+            echo json_encode(
+                array("message" => "No Ads where found.")
+            );
         }
     }
 
@@ -74,6 +113,8 @@ class AdvertiseController extends Controller {
      * @return response
      */
     public function bestAds(){
+
+        $current = new DateTimeController();
 
         /**
          * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
@@ -118,11 +159,49 @@ class AdvertiseController extends Controller {
                         ->limit(8)
                         ->get();
 
-        if($adswithsubs->count() > 0 ) {                
-                return response()->json($adswithsubs);
+        $cursor = $adswithsubs;
+
+        /**
+         * we need to loop to apply timelapse function
+         * 
+         * apparently this will output only one set of data instead of its normal procedure
+         * so we use var array[] to fill everytime foreach condition passed
+         */
+        if($cursor->count() > 0 ) {    
+            foreach($cursor as $new){
+                $idadvertise    = $new->idadvertise;
+                $idadvertisers  = $new->idadvertisers;
+                $adcategory     = $new->adcategory;
+                $title          = $new->title;
+                $content        = $new->content;
+                $url            = $new->url;
+                $img            = $new->img;
+                $createdate     = $new->createdate;
+                $startdate      = $new->startdate;
+                $enddate        = $new->enddate;
+                $timelapse      = $current->timeLapse($new->startdate);                
+                $subscriber     = $new->subscriber;
+
+                $array[] = [
+                    'idadvertise'       => $idadvertise,
+                    'idadvertisers'     => $idadvertisers,
+                    'adcategory'        => $adcategory,
+                    'title'             => $title,
+                    'content'           => $content,
+                    'url'               => $url,
+                    'img'               => $img,
+                    'createdate'        => $createdate,
+                    'startdate'         => $startdate,
+                    'enddate'           => $enddate,
+                    'timelapse'         => $timelapse,                    
+                    'subscriber'        => $subscriber
+                ];
+            }
+            
+            return response()->json($array);
         } else {
             echo json_encode(
-                array("message" => "No advertise are found.")
+                array("message" => "No Ads where found.")
             );
         }
     }
