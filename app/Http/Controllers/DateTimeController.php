@@ -58,4 +58,30 @@ class DateTimeController extends Controller
             return ($left == 1 ? $left. ' year ago' :  $left. ' years ago');
         }
     }
+
+    /**
+     * method to compute age
+     * 
+     * @param $birth
+     * 
+     * @return $age
+     */
+    public function findAge($birth){
+
+        /**
+         * retrieved the data from mongodb and implode
+         * then convert it to Carbon-base date format
+         */
+        $newbirth = explode("-",$birth);
+
+        $dt = Carbon::now();
+
+        $dt->setDate($newbirth[0], $newbirth[1], $newbirth[2])->toDateString();
+
+        $current = $this->setDatetime();
+        
+        if($age = $dt->diffInYears($current)) {
+            return $age;
+        }
+    }
 }

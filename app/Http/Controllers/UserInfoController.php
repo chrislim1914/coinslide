@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\DateTimeController;
 
 class UserinfoController extends Controller {
 
@@ -77,6 +78,41 @@ class UserinfoController extends Controller {
             return response()->json([
                 "message" => "User Information not found."
             ]);
+        }
+    }
+
+    public function forAge(){
+        $current = new DateTimeController();
+        $userinfo = UserInfo::all();
+
+        $cursor = $userinfo;
+        if($cursor->count() > 0 ) {    
+            foreach($cursor as $new){
+                $_id              = $new->_id;
+                $iduser           = $new->iduser;
+                $gender           = $new->gender;
+                $profilephoto     = $new->profilephoto;
+                $birth            = $new->birth;
+                $city             = $new->city;
+                $mStatus          = $new->gender;
+
+                $array[] = [
+                    '_id'     => $_id,
+                    'iduser'     => $iduser,
+                    'gender'     => $gender,
+                    'profilephoto'     => $profilephoto,
+                    'birth'     => $birth,
+                    'age'       => $current->findAge($birth),
+                    'city'     => $city,
+                    'mStatus'     => $mStatus,
+                ];
+            }
+            
+            return response()->json($array);
+        } else {
+            echo json_encode(
+                array("message" => "No Content are found.")
+            );
         }
     }
 }

@@ -160,7 +160,7 @@ $router->group(['prefix' => 'api/'], function($router)
 $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Userinfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@all']);
-	$router->get('Userinfo/try/{id}', ['middleware' => 'cors', 'uses' => 'UserinfoController@try']);
+	$router->get('Userinfo/forAge/', ['middleware' => 'cors', 'uses' => 'UserinfoController@forAge']);
 });
 
 $router->group(['prefix' => '/'], function($router)
