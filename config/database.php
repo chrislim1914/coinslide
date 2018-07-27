@@ -30,7 +30,18 @@ return array(
         ),
 
         #third database connection predis
+        'redis' => [
+
+            'client' => 'predis',
         
+            'default' => [
+                'host' => env('REDIS_HOST', 'localhost'),
+                'password' => env('REDIS_PASS', null),
+                'port' => env('REDIS_PORT', 6379),
+                'database' => 0,
+            ],
+        
+        ],
     ),
 
     'migrations' => 'migrations'

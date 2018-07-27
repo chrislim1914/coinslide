@@ -12,8 +12,7 @@
 */
 
 $router->get('/', function () use ($router) {
-	//return $router->app->version();
-	return view('sample');
+	return $router->app->version();
 });
 
 /**
@@ -161,6 +160,29 @@ $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->get('Userinfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@all']);
 	$router->get('Userinfo/forAge/', ['middleware' => 'cors', 'uses' => 'UserinfoController@forAge']);
+});
+
+/**
+ * API Route for Redis
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('totalreward/', ['middleware' => 'cors', 'uses' => 'RedisController@totalreward']);
+	$router->get('tag/', ['middleware' => 'cors', 'uses' => 'RedisController@loadAllTags']);
+	$router->get('tag/all', ['middleware' => 'cors', 'uses' => 'RedisController@loadAll']);
+});
+
+/**
+ * API Route for Tags
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Tags/', ['middleware' => 'cors', 'uses' => 'TagController@readTags']);
+	$router->post('Tags/create/', ['middleware' => 'cors', 'uses' => 'TagController@createTag']);
 });
 
 $router->group(['prefix' => '/'], function($router)

@@ -28,6 +28,7 @@ $app->withFacades([
     'Eloquent' => 'Illuminate\Database\Eloquent\Model',
     'Socialite' => 'Laravel\Socialite\Facades\Socialite::class',
     'Facebook' => SammyK\LaravelFacebookSdk\FacebookFacade::class,
+    'Redis'    => Illuminate\Support\Facades\Redis::class,
 ]);
 
 $app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
@@ -92,6 +93,7 @@ $app->register(Intervention\Image\ImageServiceProvider::class);
 $app->register(\Illuminate\Mail\MailServiceProvider::class);
 $app->register(\SocialiteProviders\Manager\ServiceProvider::class);
 $app->register(SammyK\LaravelFacebookSdk\LaravelFacebookSdkServiceProvider::class);
+//$app->register(Illuminate\Redis\RedisServiceProvider::class);
 //$app->register(Laravel\Socialite\SocialiteServiceProvider::class);
 
 // $app->register(App\Providers\EventServiceProvider::class);

@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\DateTimeController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\RedisController;
 
 class ContentController extends Controller {
 
@@ -261,6 +263,26 @@ class ContentController extends Controller {
         $Contents->description = $request->description;
 
         if($Contents->save()) {
+            /**
+             * instantiate TagController and save on tag table
+             * then get id everytime its save on $taglist
+             */
+            $tagCont = new TagController();
+            $taglist = $tagCont->createTag($request->tag);
+            $idcontent = $Contents->id;
+
+            /**
+             * loop thru $taglist
+             * then instantiate RedisController
+             * hset everything on $taglist
+             */
+            for ($i = 0; $i < count($taglist); $i++) {
+                
+                $redis = new RedisController();
+                echo $taglist[$i][0];
+                $redis->contentTag($taglist[$i][0], $idcontent);
+            }
+
             echo json_encode(
                 array("message" => "New Contents Created.")
             );

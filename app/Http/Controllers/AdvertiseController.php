@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\DateTimeController;
+use App\Http\Controllers\TagController;
+use App\Http\Controllers\RedisController;
 
 class AdvertiseController extends Controller {
 
@@ -27,8 +29,10 @@ class AdvertiseController extends Controller {
          * then we will create a custom pagination for union query
          */
         $adsnosubs = DB::table('advertises')
+                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
+                                'advertisers.company_name',
                                 'advertises.adcategory',
                                 'advertises.title',
                                 'advertises.content',
@@ -43,9 +47,11 @@ class AdvertiseController extends Controller {
                         );
 
         $adswithsubs = DB::table('advertises')
+                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
                         ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
+                                'advertisers.company_name',
                                 'advertises.adcategory',
                                 'advertises.title',
                                 'advertises.content',
@@ -72,6 +78,7 @@ class AdvertiseController extends Controller {
             foreach($cursor as $new){
                 $idadvertise    = $new->idadvertise;
                 $idadvertisers  = $new->idadvertisers;
+                $company_name   = $new->company_name;
                 $adcategory     = $new->adcategory;
                 $title          = $new->title;
                 $content        = $new->content;
@@ -86,6 +93,7 @@ class AdvertiseController extends Controller {
                 $array[] = [
                     'idadvertise'       => $idadvertise,
                     'idadvertisers'     => $idadvertisers,
+                    'company_name'      => $company_name,
                     'adcategory'        => $adcategory,
                     'title'             => $title,
                     'content'           => $content,
@@ -124,8 +132,10 @@ class AdvertiseController extends Controller {
          * then we will create a custom pagination for union query
          */
         $adsnosubs = DB::table('advertises')
+                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
+                                'advertisers.company_name',
                                 'advertises.adcategory',
                                 'advertises.title',
                                 'advertises.content',
@@ -140,9 +150,11 @@ class AdvertiseController extends Controller {
                         );
 
         $adswithsubs = DB::table('advertises')
+                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
                         ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
+                                'advertisers.company_name',
                                 'advertises.adcategory',
                                 'advertises.title',
                                 'advertises.content',
@@ -171,6 +183,7 @@ class AdvertiseController extends Controller {
             foreach($cursor as $new){
                 $idadvertise    = $new->idadvertise;
                 $idadvertisers  = $new->idadvertisers;
+                $company_name   = $new->company_name;
                 $adcategory     = $new->adcategory;
                 $title          = $new->title;
                 $content        = $new->content;
@@ -185,6 +198,7 @@ class AdvertiseController extends Controller {
                 $array[] = [
                     'idadvertise'       => $idadvertise,
                     'idadvertisers'     => $idadvertisers,
+                    'company_name'      => $company_name,
                     'adcategory'        => $adcategory,
                     'title'             => $title,
                     'content'           => $content,
@@ -249,10 +263,30 @@ class AdvertiseController extends Controller {
         $advertise->content         = $request->content;
         $advertise->url             = $request->url;
         $advertise->img             = $request->img;
-        $advertise->startdate       = $request->startdate;
-        $advertise->enddate         = $request->enddate;
+        // $advertise->startdate       = $request->startdate;
+        // $advertise->enddate         = $request->enddate;
 
         if($advertise->save()) {
+
+            /**
+             * instantiate TagController and save on tag table
+             * then get id everytime its save on $taglist
+             */
+            $tagCont = new TagController();
+            $taglist = $tagCont->createTag($request->tag);
+            $idads = $advertise->id;
+
+            /**
+             * loop thru $taglist
+             * then instantiate RedisController
+             * hset everything on $taglist
+             */
+            for ($i = 0; $i < count($taglist); $i++) {
+                
+                $redis = new RedisController();
+                $redis->adsTag($taglist[$i][0], $idads);
+            }
+
             echo json_encode(
                 array("message" => "New Ads Created.")
             );
