@@ -4,9 +4,11 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Subscriptions extends Model
-{
+class Content extends Model
+{    
     public $timestamps = false;
+
+    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -14,8 +16,6 @@ class Subscriptions extends Model
      * @var array
      */
     protected $fillable = [
-        'idsubscription', 'iduser', 'idadvertiser', 'startdate', 'enddate', 'use'
+        'iduser', 'title', 'content', 'description', 'createdate', 'modifieddate', 'delete'
     ];
-
-    
 }

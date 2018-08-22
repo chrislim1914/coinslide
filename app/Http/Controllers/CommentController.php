@@ -6,7 +6,7 @@ use App\Comment;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Http\Controllers\DateTimeController;
+use App\Http\Controllers\UtilityController;
 
 
 class CommentController extends Controller {
@@ -47,7 +47,6 @@ class CommentController extends Controller {
 
         //find first the comment info
         $comment = Comment::where('idcomment', $request->idcomment)
-                            ->where('idcontent', $request->idcontent)
                             ->get();
 
         if($comment->count() > 0 ){   
@@ -113,7 +112,7 @@ class CommentController extends Controller {
      */
     public function loadComment($idcontent){
 
-        $current = new DateTimeController();
+        $current = new UtilityController();
 
         //load comments
         $comment = DB::table('comments')
@@ -162,6 +161,54 @@ class CommentController extends Controller {
             echo json_encode(
                 array("message" => "No Comments are found.")
             );
+        }
+    }
+
+    /**
+     * method to get user action on comment table
+     * 
+     * @param $iduser, $idcontent
+     * 
+     * @return mix
+     */
+    public function loadCommentUserInteraction($iduser, $idcontent){
+        
+        //load comments
+        $comment = DB::table('comments')
+                        ->select('comments.createdate')
+                        ->where('comments.idcontent', $idcontent)
+                        ->where('comments.iduser', $iduser)
+                        ->where('comments.delete', 0)
+                        ->orderBy('comments.idcomment', 'desc')
+                        ->limit(1)
+                        ->get();
+
+        if($comment->count() > 0){
+            foreach($comment as $qwer){
+                return $lcon = $qwer->createdate;
+            }
+        } else {
+            return 'no activity';
+        }
+
+    }
+
+    /**
+     * method to count comment by content
+     * 
+     * @param $idcontent
+     * 
+     * @return mix
+     */
+    public function countCommentforContentList($idcontent){
+        $count = Comment::where('idcontent', $idcontent)
+                        ->where('delete', 0)
+                        ->count();
+
+        if($count){
+            return json_encode($count);
+        } else {
+            return json_encode(0);
         }
     }
 }

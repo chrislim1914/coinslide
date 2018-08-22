@@ -98,6 +98,26 @@ class RedisController extends Controller {
         }
 
         return response()->json($list);
+    }    
+
+    public function getAllTagofContentbyId(){
+
+        $tag = $this->redis->keys('*');
+
+        for ($i = 0; $i < count($tag); $i++) {
+            $taglist = $this->redis->hgetall($tag[$i]);
+            $tags = $taglist;
+            $list[] = $tags;
+            
+        }
+        print_r($list);
+        foreach($list as $key => $value){
+            foreach($value as $k => $v){
+                if (strpos($k, 'content') !== false){
+                    
+                }
+            }
+        }
     }
 }
 

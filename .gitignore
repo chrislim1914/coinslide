@@ -3,8 +3,3 @@
 Homestead.json
 Homestead.yaml
 .env
-#composer.lock
-composer.lock
-#ignore assets
-#public/assets/
-.gitignore

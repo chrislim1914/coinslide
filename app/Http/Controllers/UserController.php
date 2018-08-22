@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\User;
-use App\Http\Controllers\PasswordEncrypt;
+use App\UserInfo;
+use App\Http\Controllers\UserInfoController;
+use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -12,52 +14,6 @@ use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
-
-    /** 
-    * Display a listing of the resource. 
-    * 
-    * @return \Illuminate\Http\Response 
-    */ 
-   public function authenticate(Request $request){
- 
-        $user = User::where('email', $request->email)->first();
-
-        $hash = new PasswordEncrypt();
-
-        if($hash->verifyPassword($request->password, $user->password)){  
-
-            $apikey = base64_encode(str_random(40));
-            return response()->json([
-                                'status' => 'success',
-                                'api_key' => $apikey
-                                ]);    
-        }else{    
-            return response()->json(['status' => 'fail'],401);    
-        } 
-   }
-
-    /**
-     * method to retrieved all active users
-     * 
-     * @return Response
-     */
-    public function readUsers(){
-                
-        $Users  = User::where('delete', 0)
-                        ->orderBy('iduser', 'desc')
-                        ->paginate(5);
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $Users;
-
-        if($cursor->count() > 0 ) {
-            return response()->json($Users);
-        } else {
-            echo json_encode(
-                array("message" => "No Users are found.")
-            );
-        }
-    }
-
     /**
      * method to retrieved single user by iduser
      * 
@@ -66,7 +22,7 @@ class UserController extends Controller
      */    
     public function getUser($id){
 
-        //we convert the $id to integer
+        //convert the $id to integer
         $iduser = intval($id);
 
         $userinfo = DB::connection('mongodb')->collection('userinformations')
@@ -74,7 +30,6 @@ class UserController extends Controller
                         ->get();
 
         $user = DB::table('users')
-                //->join($userinfo, 'users.iduser', '=', 'iduser')
                 ->select('users.iduser',
                         'users.first_name',
                         'users.last_name',
@@ -82,12 +37,21 @@ class UserController extends Controller
                         'users.phone',
                         'users.nickname',
                         'users.createdate',
-                        'users.delete',
-                        'users.national')
+                        'users.delete')
                 ->where('users.iduser', $id)
                 ->get();
-        $collection = $userinfo->merge($user);
-        return response()->json($collection);
+
+        // $collection = $user->merge($userinfo);  
+        $collection = ['primary data' => $user, 'other data' => $userinfo ];
+
+        if($user->count() > 0){
+            return response()->json($collection);
+        } else {
+            return response()->json([
+                "message" => "User dont exist!"
+            ]);
+        }
+        
     }
 
     /**
@@ -105,31 +69,42 @@ class UserController extends Controller
         $cursor = $Users;        
 
         if($cursor->count() > 0 ) {
-
-            echo json_encode(
-                array("message" => "email already registered.")
-            );
-
+            return response()->json([
+                "message" => "email already registered."
+            ]);
         } else {
 
-            $hash = new PasswordEncrypt();        
+            $hash = new UtilityController();        
             $User = new User();
             $User->first_name = $request->first_name;
             $User->last_name = $request->last_name;
             $User->email = $request->email;
-            $User->phone = $request->phone;
             $User->nickname = $request->nickname;
             $User->password = $hash->hash($request->password);//password hash
-            $User->national = $request->national;
             
             if($User->save()) {
-                echo json_encode(
-                    array("message" => "New User Created.")
-                );
+                //retrieved the new inserted iduser
+                $lastid = $User->id;
+
+                //save it to userinfo collections
+                $userinfo = new UserInfo();
+                $userinfo->iduser       = $lastid;
+                $userinfo->gender       = $request->gender;
+                $userinfo->profilephoto = '';
+                $userinfo->birth        = $request->birthdate;
+                $userinfo->country      = $request->country;
+                $userinfo->city         = $request->city;
+                $userinfo->mStatus      = $request->maritalstatus;
+                
+                $userinfo->save();
+
+                return response()->json([
+                    "message" => "New client Created."
+                ]);
             } else {
-                echo json_encode(
-                    array("message" => "User not created.")
-                );
+                return response()->json([
+                    "message" => "failed in registering new client."
+                ]);
             }
         }       
     }
@@ -138,88 +113,71 @@ class UserController extends Controller
      * method update user data excluding password
      * 
      * @param  Request  $request $id
+     * 
+     * @return response
      */
-    public function updateUser(Request $request, $id){
+    public function updateData(Request $request, $id){
 
         /*
-         * find the user
+         * find first the user if exist
          */
         $Users  = User::all()
                         ->where('iduser', $id)
                         ->where('delete', 0);        
 
-        if($Users->count() > 0 ) {
-            /**
-             * check again the email if already registered
-             */
-            $User = User::where('email', $request->email)
-                        ->where('iduser', '<>', $id)
-                        ->get();
-            if($User->count() > 0) {
-                echo json_encode(
-                    array("message" => "Email already registered!")
-                ); 
-            } else {
-
-                $updateUser = User::where('iduser', $id);
-                if($updateUser->update([
-                                'first_name' => $request->first_name,
-                                'last_name' => $request->last_name,
-                                'email'     => $request->email,
-                                'phone'     => $request->phone,
-                                'nickname'  => $request->nickname,
-                                'national'  => $request->national
-                                        ])) {
-                    echo json_encode(
-                        array("message" => "User Info Updated.")
-                    );
-                } else {
-                    echo json_encode(
-                        array("message" => "there is nothing to update.")
-                    );
-                }
-            }
-
-        } else {
-            echo json_encode(
-                array("message" => "User not found.")
-            );           
+        if($Users->count() <= 0 ) {
+            return response()->json([
+                "message" => "User not found."
+            ]);
         }
-    }
-    
-    /**
-     * method to search user table by first name, last name, nickname, email
-     * with pagination
-     * 
-     * @return Request $request responce 
-     */
-    public function searchUser(Request $request){
 
-        /**
-         * check if search string is null before we query
-         */
-        if($request->search == null) {
-            echo json_encode(
-                array("message" => "No Search String.")
-            );
+        //instantiate UserInfo Controller
+        $userinfo = new UserInfoController();
+
+        //save the userinformations collection data to array
+        $userdata = [
+            'gender'    => $request->gender,
+            'birth'     => $request->birthdate,
+            'country'   => $request->country,
+            'city'      => $request->city,
+            'mStatus'   => $request->maritalstatus,
+        ];        
+        
+        //update users
+        $updateUser = DB::table('users')
+        ->where('iduser', $id);
+
+        if($updateUser->update([
+            'first_name'    => $request->first_name,
+            'last_name'     => $request->last_name,
+            'nickname'      => $request->nickname,
+                    ])) 
+        {
+            //update userinformations
+            $userinfo->updateUserInfo($id,$userdata);
+            
+            return response()->json([
+                "message" => "User information updated."
+                ]);
         } else {
-            $Users = User::where('first_name', 'LIKE', "%$request->search%")
-                              ->orWhere('last_name', 'LIKE', "%$request->search%")
-                              ->orWhere('nickname', 'LIKE', "%$request->search%")
-                              ->orWhere('email', 'LIKE', "%$request->search%")
-                              ->paginate(5);
-
-            //the cursor method may be used to greatly reduce your memory usage:
-            $cursor = $Users;
-
-            if($cursor->count() > 0 ) {
-                return response()->json($cursor);
+            //update userinformations
+            if($userinfo->updateUserInfo($id,$userdata)){
+                return response()->json([
+                    "message" => "User information updated."
+                    ]);
             } else {
-                echo json_encode(
-                    array("message" => "No User are found.")
-                );
+                return response()->json([
+                    "message" => "there is nothing to updated."
+                    ]);
             }
-        }        
+            /**
+             * it update nothing
+             * if data is untouch or clean
+             */
+            return response()->json([
+                "message" => "Failed to update"
+                ]);
+        }
     }
 
     /**
@@ -228,7 +186,9 @@ class UserController extends Controller
      * then there is nothing to update the password
      * else then update the password
      * 
-     * @return Request $request $id
+     * @param Request $request $id
+     * 
+     * @return response
      */
     public function updatePassword(Request $request, $id){
 
@@ -245,41 +205,43 @@ class UserController extends Controller
         if($cursor->count() > 0 ) {
             
             foreach ($cursor as $User) {
-                        $oldPass = $User->password;
+                $oldPass = $User->password;
             }   
                 //instantiate PasswordEncrypt
-                $hash = new PasswordEncrypt();
+                $hash = new UtilityController();
                 
                 /**
                  * check if password is same with inputed password
-                 * 
                  * if the same then tell there is nothing to update
+                 * else then hash the inputed password string and update the table
                  * 
-                 * else then hash the inputed password string then hash and update the table
                  */
                 if($hash->verifyPassword($inputPass, $oldPass)) {
-                    echo json_encode(
-                        array("message" => "there is nothing to update.")
-                    );
+                    return response()->json([
+                        "message" => "there is nothing to update."
+                    ]);
                 } else {
                     //update password
                     $updateUser = User::where('iduser', $id);
                     $updateUser->update(['password' => $hash->hash($inputPass)]);
-                    echo json_encode(
-                        array("message" => "User password Updated.")
-                    );                    
+                    return response()->json([
+                        "message" => "User password Updated."
+                    ]);             
                 } 
         } else {
-            echo json_encode(
-                array("message" => "User not found.")
-            );
+            return response()->json([
+                "message" => "User not found."
+            ]);
         }
     }
 
+    
     /**
      * method to soft delete user
      * 
-     * @return $id
+     * @param $id
+     * 
+     * @return response
      */
     public function deleteUser($id){
 
@@ -291,18 +253,21 @@ class UserController extends Controller
             //soft delete user
             $deleteUser = User::where('iduser', $id);
             if($deleteUser->update(['delete' => '1'])){
-                echo json_encode(
-                    array("message" => "Account is Deleted.")
-                ); 
+                return response()->json([
+                    "message" => "Account is Deleted."
+                ]);
             } else {
+                return response()->json([
+                    "message" => "Account Deletion Failed."
+                ]);
                 echo json_encode(
                     array("message" => "Account Deletion Failed.")
                 ); 
             }              
         } else {
-            echo json_encode(
-                array("message" => "User not found.")
-            );           
+            return response()->json([
+                "message" => "User not found."
+            ]);    
         }
     }
 
@@ -313,7 +278,7 @@ class UserController extends Controller
      * 
      * @return response
      */
-    public function savePassword(Request $request, $id){
+    public function setPassword(Request $request, $id){
 
         //get the user info first
         $Users  = User::where('iduser', $id)
@@ -326,18 +291,26 @@ class UserController extends Controller
         if($cursor->count() > 0 ) {
 
             //instantiate PasswordEncrypt
-            $hash = new PasswordEncrypt();           
+            $hash = new UtilityController();           
             
-                //update password
-                $updateUser = User::where('iduser', $id);
-                $updateUser->update(['password' => $hash->hash($request->password)]);
-                echo json_encode(
-                    array("message" => "User password is set.")
-                ); 
+            //update password
+            $updateUser = User::where('iduser', $id);
+            
+            if($updateUser->update([
+                'password' => $hash->hash($request->password)
+                ])) {
+                return response()->json([
+                    "message" => "User password is set."
+                ]);
+            }else {
+                return response()->json([
+                    "message" => "failed to set password."
+                ]);
+            }            
         } else {
-            echo json_encode(
-                array("message" => "User not found.")
-            );
+            return response()->json([
+                "message" => "User not found."
+            ]);
         }
     }
 }

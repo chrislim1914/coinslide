@@ -23,15 +23,23 @@ $app = new Laravel\Lumen\Application(
     realpath(__DIR__.'/../')
 );
 
-$app->withFacades([
-    'Image' => 'Intervention\Image\Facades\Image',
-    'Eloquent' => 'Illuminate\Database\Eloquent\Model',
-    'Socialite' => 'Laravel\Socialite\Facades\Socialite::class',
-    'Facebook' => SammyK\LaravelFacebookSdk\FacebookFacade::class,
-    'Redis'    => Illuminate\Support\Facades\Redis::class,
+$app->withFacades(true, [
+    Tymon\JWTAuth\Facades\JWTAuth::class            =>  'JWTAuth',
+    Tymon\JWTAuth\Facades\JWTFactory::class         =>  'JWTFactory',
+    Illuminate\Support\Facades\Auth::class          =>  'auth',
+    Laravel\Socialite\Facades\Socialite::class      =>  'Socialite',
+    SammyK\LaravelFacebookSdk\FacebookFacade::class =>  'Facebook',
+    Illuminate\Support\Facades\Storage::class       =>  'Storage',
+    Intervention\Image\Facades\Image::class         =>  'Image',
+    Illuminate\Database\Eloquent\Model::class       =>  'Eloquent',
+    Illuminate\Support\Facades\Notification::class  =>  'Notification',
 ]);
 
+/**
+ * register Jenssegers\Mongodb before Eloquent
+ */
 $app->register(Jenssegers\Mongodb\MongodbServiceProvider::class);
+
 $app->withEloquent();
 
 /*
@@ -89,15 +97,23 @@ $app->routeMiddleware([
 $app->register(App\Providers\AppServiceProvider::class);
 $app->register(App\Providers\AuthServiceProvider::class);
 $app->register(App\Providers\EventServiceProvider::class);
+
 $app->register(Intervention\Image\ImageServiceProvider::class);
-$app->register(\Illuminate\Mail\MailServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->register(Flipbox\LumenGenerator\LumenGeneratorServiceProvider::class);
+$app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
+$app->register(Illuminate\Support\Facades\Auth::class);
 $app->register(\SocialiteProviders\Manager\ServiceProvider::class);
 $app->register(SammyK\LaravelFacebookSdk\LaravelFacebookSdkServiceProvider::class);
-//$app->register(Illuminate\Redis\RedisServiceProvider::class);
-//$app->register(Laravel\Socialite\SocialiteServiceProvider::class);
-
-// $app->register(App\Providers\EventServiceProvider::class);
-
+/*
+|--------------------------------------------------------------------------
+| configure files
+|--------------------------------------------------------------------------
+*/
+$app->configure('services');
+$app->configure('auth');
+$app->configure('jwt');
+$app->configure('mail');
 /*
 |--------------------------------------------------------------------------
 | Load The Application Routes
@@ -114,15 +130,6 @@ $app->router->group([
 ], function ($router) {
     require __DIR__.'/../routes/web.php';
 });
-
-/*
-|--------------------------------------------------------------------------
-| configure files
-|--------------------------------------------------------------------------
-*/
-$app->configure('services');
-$app->configure('mail');
-
 
 
 return $app;

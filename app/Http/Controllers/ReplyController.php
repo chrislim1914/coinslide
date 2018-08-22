@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Reply;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Controllers\DateTimeController;
+use App\Http\Controllers\UtilityController;
 
 class ReplyController extends Controller {
 
@@ -111,7 +111,7 @@ class ReplyController extends Controller {
      */
     public function loadReply($idcomment){
 
-        $current = new DateTimeController();
+        $current = new UtilityController();
 
         //load replies
         $reply = Reply::where('replies.idcomment', $idcomment)
