@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Subscriptions;
 use App\User;
-use App\Advertise;
+use App\Advertiser;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\DateTimeController;
@@ -25,11 +25,11 @@ class SubscriptionController extends Controller
         $current = new DateTimeController();
 
         if($this->findUser($request->iduser)){
-            if($this->findAds($request->idadvertise)){
+            if($this->findAdvertiser($request->idadvertiser)){
 
                 $subscribe = new Subscriptions();
                 $subscribe->iduser = $request->iduser;
-                $subscribe->idadvertise = $request->idadvertise;
+                $subscribe->idadvertiser = $request->idadvertiser;
                 $subscribe->startdate = $current->setDatetime();
 
                 if($subscribe->save()) {
@@ -44,7 +44,7 @@ class SubscriptionController extends Controller
 
             } else {
                 return response()->json([
-                    "message" => "cannot find Ads!"
+                    "message" => "cannot find Advertiser!"
                 ]);
             }
         } else {
@@ -67,7 +67,7 @@ class SubscriptionController extends Controller
         $current = new DateTimeController();
 
         $check = Subscriptions::where('iduser', $request->iduser)
-                                ->where('idadvertise', $request->idadvertise)
+                                ->where('idadvertiser', $request->idadvertiser)
                                 ->where('enddate', null)
                                 ->get();
         
@@ -117,13 +117,13 @@ class SubscriptionController extends Controller
      * @param $idadvertise
      * @return bool
      */
-    private function findAds($idadvertise){
+    private function findAdvertiser($idadvertiser){
 
         //find advertise
-        $advertise = Advertise::where('idadvertise', $idadvertise)
+        $advertiser = Advertiser::where('idadvertiser', $idadvertiser)
                             ->get();
 
-        if($advertise->count() > 0){
+        if($advertiser->count() > 0){
             return true;
         } else {
             return false;
@@ -140,19 +140,15 @@ class SubscriptionController extends Controller
     public function subscriptionList($iduser){
 
         $sublist = DB::table('subscriptions')
-                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->join('advertisers', 'subscriptions.idadvertiser', '=', 'advertisers.idadvertiser')
                         ->select('subscriptions.idsubscription',
                         'subscriptions.iduser',
-                        'subscriptions.idadvertise',
-                        'advertises.idadvertisers',
-                        'advertises.adcategory',
-                        'advertises.title',
-                        'advertises.content',
-                        'advertises.img')
+                        'subscriptions.idadvertiser',
+                        'advertisers.company_name',
+                        'advertisers.logo')
                         ->where('subscriptions.iduser', $iduser)
-                        ->whereNull('advertises.enddate')
                         ->whereNull('subscriptions.enddate')
-                        ->orderBy('advertises.title', 'ASC')
+                        ->orderBy('advertisers.company_name', 'ASC')
                         ->get();
         
         if($sublist->count() > 0 ){
@@ -172,17 +168,14 @@ class SubscriptionController extends Controller
     public function recentSubscriptionList($iduser){
 
         $sublist = DB::table('subscriptions')
-                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->join('advertisers', 'subscriptions.idadvertiser', '=', 'advertisers.idadvertiser')
                         ->select('subscriptions.idsubscription',
                         'subscriptions.iduser',
-                        'subscriptions.idadvertise',
-                        'advertises.idadvertisers',
-                        'advertises.adcategory',
-                        'advertises.title',
-                        'advertises.content',
-                        'advertises.img')
+                        'subscriptions.idadvertiser',
+                        'advertisers.idadvertiser',
+                        'advertisers.company_name',
+                        'advertisers.logo')
                         ->where('subscriptions.iduser', $iduser)
-                        ->whereNull('advertises.enddate')
                         ->whereNull('subscriptions.enddate')
                         ->orderBy('subscriptions.startdate', 'DESC')
                         ->get();
@@ -196,19 +189,15 @@ class SubscriptionController extends Controller
 
     public function subscriptionHistory($iduser){
         $sublist = DB::table('subscriptions')
-                        ->join('advertises', 'subscriptions.idadvertise', '=', 'advertises.idadvertise')
+                        ->join('advertisers', 'subscriptions.idadvertiser', '=', 'advertisers.idadvertiser')
                         ->select('subscriptions.idsubscription',
                         'subscriptions.iduser',
-                        'subscriptions.idadvertise',
-                        'advertises.idadvertisers',
-                        'advertises.adcategory',
-                        'advertises.title',
-                        'advertises.content',
-                        'advertises.img',
+                        'subscriptions.idadvertiser',
+                        'advertisers.idadvertiser',
+                        'advertisers.company_name',
+                        'advertisers.logo',
                         'subscriptions.startdate as subscriptionstart',
-                        'subscriptions.enddate as subscriptionend',
-                        'advertises.startdate as adsstart',
-                        'advertises.enddate as adsend')
+                        'subscriptions.enddate as subscriptionend')
                         ->where('subscriptions.iduser', $iduser)
                         ->orderBy('subscriptions.startdate', 'DESC')
                         ->get();

@@ -16,7 +16,7 @@ class CreateSubscriptionsTable extends Migration
         Schema::connection('mysql')->create('subscriptions', function (Blueprint $table) {
             $table->increments('idsubscription');
             $table->integer('iduser');
-            $table->integer('idadvertise');
+            $table->integer('idadvertiser');
             $table->timestamp('startdate');
             $table->timestamp('enddate');
             $table->integer('use');

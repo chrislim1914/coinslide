@@ -228,7 +228,6 @@ class UserController extends Controller
      * then there is nothing to update the password
      * else then update the password
      * 
-     * 
      * @return Request $request $id
      */
     public function updatePassword(Request $request, $id){

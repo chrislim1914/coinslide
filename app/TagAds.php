@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class Tag extends Model implements AuthenticatableContract, AuthorizableContract
+class TagAds extends Model implements AuthenticatableContract, AuthorizableContract
 {
     use Authenticatable, Authorizable;
 
@@ -22,7 +22,7 @@ class Tag extends Model implements AuthenticatableContract, AuthorizableContract
      * @var array
      */
     protected $fillable = [
-        'idtag', 'name', 
+        'idtag', 'ads_tag_name', 
     ];
 
 }

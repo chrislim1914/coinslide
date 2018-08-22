@@ -16,7 +16,7 @@ use App\Http\Controllers\RedisController;
 class ContentController extends Controller {
 
     /**
-     * method to read all content in desc order by idcontent
+     * method to read all content in desc order by number of likes
      * inner join users and likes
      * 
      * @return Responce
@@ -268,7 +268,7 @@ class ContentController extends Controller {
              * then get id everytime its save on $taglist
              */
             $tagCont = new TagController();
-            $taglist = $tagCont->createTag($request->tag);
+            $taglist = $tagCont->createContentTag($request->tag);
             $idcontent = $Contents->id;
 
             /**

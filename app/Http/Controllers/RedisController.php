@@ -7,7 +7,8 @@ use App\Http\Controllers\Controller;
 class RedisController extends Controller {
 
     private $redis;
-
+    private $trredis;
+    private $otherdb = 1;
     /**
      * redis connection
      */
@@ -17,7 +18,7 @@ class RedisController extends Controller {
             'host' => getenv('REDIS_HOST'),
             'port' => getenv('REDIS_PORT'),
             'password' => getenv('REDIS_PASS'),
-            'database' => getenv('REDIS_DB'),
+            'database' => $this->otherdb,
         ]);
     }
 
@@ -26,10 +27,25 @@ class RedisController extends Controller {
      * 
      * @return response
      */
-    public function totalreward(){        
+    public function totalreward(){
+
+        /**
+         * connection only for total reward
+         * 
+         * we create separate connection for it use different database inside redis
+         * as its has different hset format
+         */
+        $this->trredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => getenv('REDIS_DB'),
+        ]);    
+
         $title = getenv('APP_NAME');
         return response()->json([
-            "message" => $this->redis->hget($title,'totalreward')
+            "message" => $this->trredis->hget($title,'totalreward')
             ]);     
     }
 
@@ -79,10 +95,9 @@ class RedisController extends Controller {
             $taglist = $this->redis->hgetall($tag[$i]);
             $tags = $taglist;
             $list[] = [$tag[$i] => $tags];
-            print_r(array_keys($tags));
-            
         }
-        // return response()->json($list);
+
+        return response()->json($list);
     }
 }
 

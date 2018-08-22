@@ -14,7 +14,7 @@ class Subscriptions extends Model
      * @var array
      */
     protected $fillable = [
-        'idsubscription', 'iduser', 'idadvertise', 'startdate', 'enddate', 'use'
+        'idsubscription', 'iduser', 'idadvertiser', 'startdate', 'enddate', 'use'
     ];
 
     

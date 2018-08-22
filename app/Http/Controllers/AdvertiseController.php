@@ -28,27 +28,27 @@ class AdvertiseController extends Controller {
          * 
          * then we will create a custom pagination for union query
          */
-        $adsnosubs = DB::table('advertises')
-                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
-                        ->select('advertises.idadvertise',
-                                'advertises.idadvertisers',
-                                'advertisers.company_name',
-                                'advertises.adcategory',
-                                'advertises.title',
-                                'advertises.content',
-                                'advertises.url',
-                                'advertises.img',
-                                'advertises.createdate', 
-                                'advertises.startdate',
-                                'advertises.enddate',
-                                DB::raw("(0) as subscriber"))
-                        ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
-                                                            ->select('subscriptions.idadvertise')
-                        );
+        // $adsnosubs = DB::table('advertises')
+        //                 ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
+        //                 ->select('advertises.idadvertise',
+        //                         'advertises.idadvertisers',
+        //                         'advertisers.company_name',
+        //                         'advertises.adcategory',
+        //                         'advertises.title',
+        //                         'advertises.content',
+        //                         'advertises.url',
+        //                         'advertises.img',
+        //                         'advertises.createdate', 
+        //                         'advertises.startdate',
+        //                         'advertises.enddate',
+        //                         DB::raw("(0) as subscriber"))
+        //                 ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
+        //                                                     ->select('subscriptions.idadvertise')
+        //                 );
 
         $adswithsubs = DB::table('advertises')
                         ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
-                        ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
+                        //->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
                                 'advertisers.company_name',
@@ -59,12 +59,12 @@ class AdvertiseController extends Controller {
                                 'advertises.img',
                                 'advertises.createdate', 
                                 'advertises.startdate',
-                                'advertises.enddate',
-                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
-                        ->whereNull('subscriptions.enddate')
-                        ->union($adsnosubs)
+                                'advertises.enddate')//,
+                        //         DB::raw('count(subscriptions.idsubscription) as subscriber'))
+                        // ->whereNull('subscriptions.enddate')
+                        //->union($adsnosubs)
                         ->groupBy('advertises.idadvertise')
-                        ->orderBy('subscriber', 'DESC')
+                        //->orderBy('subscriber', 'DESC')
                         ->get();
         $cursor = $adswithsubs;
 
@@ -88,7 +88,7 @@ class AdvertiseController extends Controller {
                 $startdate      = $new->startdate;
                 $enddate        = $new->enddate;
                 $timelapse      = $current->timeLapse($new->startdate);                
-                $subscriber     = $new->subscriber;
+                //$subscriber     = $new->subscriber;
 
                 $array[] = [
                     'idadvertise'       => $idadvertise,
@@ -103,7 +103,7 @@ class AdvertiseController extends Controller {
                     'startdate'         => $startdate,
                     'enddate'           => $enddate,
                     'timelapse'         => $timelapse,                    
-                    'subscriber'        => $subscriber
+                    //'subscriber'        => $subscriber
                 ];
             }
             
@@ -131,27 +131,27 @@ class AdvertiseController extends Controller {
          * 
          * then we will create a custom pagination for union query
          */
-        $adsnosubs = DB::table('advertises')
-                        ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
-                        ->select('advertises.idadvertise',
-                                'advertises.idadvertisers',
-                                'advertisers.company_name',
-                                'advertises.adcategory',
-                                'advertises.title',
-                                'advertises.content',
-                                'advertises.url',
-                                'advertises.img',
-                                'advertises.createdate', 
-                                'advertises.startdate',
-                                'advertises.enddate',
-                                DB::raw("(0) as subscriber"))
-                        ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
-                                                            ->select('subscriptions.idadvertise')
-                        );
+        // $adsnosubs = DB::table('advertises')
+        //                 ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
+        //                 ->select('advertises.idadvertise',
+        //                         'advertises.idadvertisers',
+        //                         'advertisers.company_name',
+        //                         'advertises.adcategory',
+        //                         'advertises.title',
+        //                         'advertises.content',
+        //                         'advertises.url',
+        //                         'advertises.img',
+        //                         'advertises.createdate', 
+        //                         'advertises.startdate',
+        //                         'advertises.enddate',
+        //                         DB::raw("(0) as subscriber"))
+        //                 ->whereNotIn('advertises.idadvertise', DB::table('subscriptions')
+        //                                                     ->select('subscriptions.idadvertise')
+        //                 );
 
         $adswithsubs = DB::table('advertises')
                         ->join('advertisers', 'advertises.idadvertisers', '=', 'advertisers.idadvertiser')
-                        ->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
+                        //->join('subscriptions','advertises.idadvertise', '=', 'subscriptions.idadvertise' )
                         ->select('advertises.idadvertise',
                                 'advertises.idadvertisers',
                                 'advertisers.company_name',
@@ -162,12 +162,12 @@ class AdvertiseController extends Controller {
                                 'advertises.img',
                                 'advertises.createdate', 
                                 'advertises.startdate',
-                                'advertises.enddate',
-                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
-                        ->whereNull('subscriptions.enddate')                        
-                        ->union($adsnosubs)
+                                'advertises.enddate')//,
+                        //         DB::raw('count(subscriptions.idsubscription) as subscriber'))
+                        // ->whereNull('subscriptions.enddate')                        
+                        // ->union($adsnosubs)
                         ->groupBy('advertises.idadvertise')
-                        ->orderBy('subscriber', 'DESC')
+                        //->orderBy('subscriber', 'DESC')
                         ->limit(8)
                         ->get();
 
@@ -193,7 +193,7 @@ class AdvertiseController extends Controller {
                 $startdate      = $new->startdate;
                 $enddate        = $new->enddate;
                 $timelapse      = $current->timeLapse($new->startdate);                
-                $subscriber     = $new->subscriber;
+                //$subscriber     = $new->subscriber;
 
                 $array[] = [
                     'idadvertise'       => $idadvertise,
@@ -208,7 +208,7 @@ class AdvertiseController extends Controller {
                     'startdate'         => $startdate,
                     'enddate'           => $enddate,
                     'timelapse'         => $timelapse,                    
-                    'subscriber'        => $subscriber
+                    //'subscriber'        => $subscriber
                 ];
             }
             

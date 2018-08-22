@@ -17,24 +17,75 @@ class AdvertiserController extends Controller {
      * @return response
      */
     public function advertiserList(){
-        //create query advertiser
+        /**
+         * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
+         * 
+         * the second query is to find unsubscribe count and subscribe count is equal then the subscription value = 0
+         * 
+         * the third query is advertiser with link on subscribe table and count the subscription but filter the enddate
+         * to avoid any miscount value base on second query
+         * 
+         */
         $advertisers = DB::table('advertisers')
-                        ->select('advertisers.idadvertiser', 'advertisers.iduser', 'advertisers.company_name',
-                        'advertisers.business_registration', 'advertisers.business_category', 'advertisers.representative_name',
-                        'advertisers.representative_contactno', 'advertisers.company_website', 'advertisers.email',
-                        'advertisers.password', 'advertisers.delete' )
+                        ->select('advertisers.idadvertiser', 
+                                'advertisers.iduser', 
+                                'advertisers.company_name',
+                                'advertisers.business_registration', 
+                                'advertisers.business_category', 
+                                'advertisers.representative_name',
+                                'advertisers.representative_contactno', 
+                                'advertisers.company_website', 
+                                'advertisers.email',
+                                DB::raw("(0) as subscriber"))
+                                ->where('advertisers.delete', 0)
+                                ->whereNotIn('advertisers.idadvertiser', DB::table('subscriptions')
+                                                                        ->select('subscriptions.idadvertiser')
+                                );
+        $advertiserAllEnded = DB::table('advertisers')
+                                ->join('subscriptions', 'advertisers.idadvertiser', '=', 'subscriptions.idadvertiser')
+                                ->select('advertisers.idadvertiser', 
+                                        'advertisers.iduser', 
+                                        'advertisers.company_name',
+                                        'advertisers.business_registration', 
+                                        'advertisers.business_category', 
+                                        'advertisers.representative_name',
+                                        'advertisers.representative_contactno', 
+                                        'advertisers.company_website', 
+                                        'advertisers.email',
+                                        DB::raw("(0) as subscriber"))
+                                ->where('advertisers.delete', 0)
+                                ->groupBy('advertisers.idadvertiser')
+                                ->having(DB::raw("Count(subscriptions.startdate)"), '=', DB::raw("Count(subscriptions.enddate)"));
+
+        $advertiserswithSub = DB::table('advertisers')
+                        ->join('subscriptions', 'advertisers.idadvertiser', '=', 'subscriptions.idadvertiser')
+                        ->select('advertisers.idadvertiser', 
+                                'advertisers.iduser', 
+                                'advertisers.company_name',
+                                'advertisers.business_registration', 
+                                'advertisers.business_category', 
+                                'advertisers.representative_name',
+                                'advertisers.representative_contactno', 
+                                'advertisers.company_website', 
+                                'advertisers.email',
+                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
                         ->where('advertisers.delete', 0)
+                        ->whereNull('subscriptions.enddate')                        
+                        ->union($advertisers)
+                        ->union($advertiserAllEnded)
+                        ->groupBy('advertisers.idadvertiser')
+                        ->orderBy('subscriber', 'DESC')
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $advertisers;
+        $cursor = $advertiserswithSub;
 
         if($cursor->count() > 0 ) {                
-                return response()->json($cursor);
+            return response()->json($cursor);
         } else {
-            echo json_encode(
-                array("message" => "No advertiser are found.")
-            );
+            return response()->json([
+                "message" => "No advertiser are found."
+            ]);
         }
     }
 
@@ -65,13 +116,12 @@ class AdvertiserController extends Controller {
                     'representative_contactno' => $new->representative_contactno,
                     'company_website' => $new->company_website,
                     'email' => $new->email,
-                    'password' => $new->password,
                 ]);                
             }
         } else {
-            echo json_encode(
-                array("message" => "Advertiser not found.")
-            );
+            return response()->json([
+                "message" => "No advertiser are found."
+            ]);
         }
     }
 

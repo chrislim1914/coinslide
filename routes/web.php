@@ -181,8 +181,9 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('Tags/', ['middleware' => 'cors', 'uses' => 'TagController@readTags']);
-	$router->post('Tags/create/', ['middleware' => 'cors', 'uses' => 'TagController@createTag']);
+	$router->get('Content/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllContentTags']);
+	$router->get('Ads/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllAdsTags']);
+	$router->get('Advertiser/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllAdvertiserTags']);
 });
 
 $router->group(['prefix' => '/'], function($router)
