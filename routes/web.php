@@ -11,9 +11,9 @@
 |
 */
 
-// $router->get('/', function () use ($router) {
-//     return $router->app->version();
-// });
+$router->get('/', function () use ($router) {
+    return $router->app->version();
+});
 
 /**
  * API Route for User
@@ -24,12 +24,18 @@ $router->group(['prefix' => 'api/'], function($router)
 {
 	//login
 	$router->post('login', ['middleware' => 'cors', 'uses' => 'AuthController@login']);
+	//logout
+	$router->post('logout', ['middleware' => 'auth', 'uses' => 'AuthController@logout']);
+	//refresh token
+	$router->post('refreshToken', ['middleware' => 'auth', 'uses' => 'AuthController@refresh']);
+	//get User Info Authenticated by JWT
+	$router->post('me', ['middleware' => 'auth', 'uses' => 'AuthController@me']);
 	
 	//register
 	$router->post('User/Register/', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
 
-
-	$router->get('User/{iduser}', ['middleware' => 'auth', 'uses' => 'UserController@getUser']);
+	//User
+	$router->get('User/{iduser}', ['middleware' => 'auth', 'uses' => 'AuthController@me']);
 	$router->post('User/{iduser}/Update/', ['middleware' => 'auth', 'uses' => 'UserController@updateData']);
 	$router->post('User/{iduser}/UpdatePassword/', ['middleware' => 'auth', 'uses' => 'UserController@updatePassword']);
 	$router->post('User/{iduser}/Updatephoto/', ['middleware' => 'auth', 'uses' => 'UserInfoController@updateProfilePhoto']);

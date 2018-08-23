@@ -58,36 +58,17 @@ class SnsController extends Controller
             ]);
         } 
 
-        //save the data to mysql and mongodb
-        $save = new User();
-            
-        $save->first_name = $user->user['name']['givenName'];
-        $save->last_name = $user->user['name']['familyName'];
-        $save->email = $user->getEmail();
-        $save->nickname = $user->user['displayName'];
-        $save->snsProviderName  = 'Google +';
-        $save->snsProviderId =$user->getId();
+        $UserData[] = [
+            'first_name'        => $user->user['name']['givenName'],
+            'last_name'         => $user->user['name']['familyName'],
+            'email'             => $user->getEmail(),
+            'nickname'          => $user->user['displayName'],
+            'snsProviderName'   => 'Google +',
+            'snsProviderId'     => $user->getId(),
+            'profilephoto'      => $photo,
+        ];
 
-        if($save->save()) {
-            
-            $userinfo = new UserInfo();
-            $userinfo->iduser       = $lastId = $save->id;
-            $userinfo->gender       = '';
-            $userinfo->profilephoto = $photo;
-            $userinfo->birth        = '';
-            $userinfo->city         = '';
-            $userinfo->mStatus      = '';
-
-            if($userinfo->save()){
-                return response()->json([
-                    "message" => "redirect to index page and ask for new password"
-                ]);
-            }
-        } else {
-            return response()->json([
-                "message" => "failed to save information"
-            ]);
-        }
+        return response()->json($UserData);
     }
     
     public function redirectToFacebook(LaravelFacebookSdk $fb){

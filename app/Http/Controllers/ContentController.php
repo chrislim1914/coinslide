@@ -239,7 +239,7 @@ class ContentController extends Controller
 
         $current = new UtilityController();       
 
-        $withlike = DB::table('contents')
+        $contents = DB::table('contents')
                         ->join('users','contents.iduser', '=', 'users.iduser')
                         ->select('contents.idcontent',
                                 'contents.iduser',
@@ -256,7 +256,7 @@ class ContentController extends Controller
                         ->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $withlike;
+        $cursor = $contents;
         
         /**
          * we need to loop to apply timelapse function
