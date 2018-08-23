@@ -311,9 +311,8 @@ class ContentController extends Controller
                     'comment'       => $countComment
                 ];
 
-            }            
+            }
             
-            //return response()->json($array);
             return response()->json($array);
         } else {
             return response()->json([

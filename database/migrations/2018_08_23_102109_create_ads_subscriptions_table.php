@@ -14,8 +14,12 @@ class CreateAdsSubscriptionsTable extends Migration
     public function up()
     {
         Schema::create('ads_subscriptions', function (Blueprint $table) {
-            $table->increments('id');
-            $table->timestamps();
+            $table->increments('idsubscription');
+            $table->integer('iduser');
+            $table->integer('idadvertise');
+            $table->dateTime('startdate');
+            $table->dateTime('enddate');
+            $table->tinyInteger('use');
         });
     }
 

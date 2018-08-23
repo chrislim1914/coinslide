@@ -91,7 +91,14 @@ $router->group(['prefix' => 'api/'], function($router)
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('Ads/New/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@newAds']);
-	$router->get('Ads/Popular/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@popularAds']);
+	$router->post('Ads/New/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@newAds']);
+	$router->post('Ads/Popular/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@popularAds']);
+	$router->get('User/{iduser}/SubscriptionList', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionList']);
+	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionHistory']);
+
+	//subscribe and unsubscribe
+	$router->post('Ads/Subscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsSubscribe']);
+	$router->post('Ads/Unsubscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsUnsubscribe']);
+
 });
 

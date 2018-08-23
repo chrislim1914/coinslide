@@ -7,9 +7,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\AdsSubscription;
 use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class UtilityController extends Controller
 {
@@ -244,29 +246,5 @@ class UtilityController extends Controller
         } else {
             return false;
         }
-    }
-
-    /**
-     * method to search for popular ads
-     * 
-     * function is within 72 hours backward
-     * ads with most subscribe
-     * 
-     * @param $subDate
-     * 
-     * @return Bool
-     */
-    public function popularAds($subDate){
-        
-        $endDate = Carbon::now();
-        $startDate = $endDate->subHours(72); 
-        $subDate = Carbon::parse($subDate);
-
-        if($subDate->gte($endDate)){
-            return true;
-        } else {
-            return false;
-        }
-        
     }
 }
