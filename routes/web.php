@@ -85,7 +85,7 @@ $router->group(['prefix' => 'api/'], function($router)
 });
 
 /**
- * API Route for Subscription
+ * API Route for Subscription and Ads
  * 
  * @return $route
  */
@@ -93,12 +93,26 @@ $router->group(['prefix' => 'api/'], function($router)
 {
 	$router->post('Ads/New/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@newAds']);
 	$router->post('Ads/Popular/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@popularAds']);
-	$router->get('User/{iduser}/SubscriptionList', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionList']);
-	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionHistory']);
+	$router->get('User/{iduser}/SubscriptionList', ['middleware' => 'auth', 'uses' => 'AdvertiseController@subscriptionList']);
+	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'auth', 'uses' => 'AdvertiseController@subscriptionHistory']);
 
 	//subscribe and unsubscribe
-	$router->post('Ads/Subscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsSubscribe']);
-	$router->post('Ads/Unsubscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsUnsubscribe']);
+	$router->post('Ads/Subscribe', ['middleware' => 'auth', 'uses' => 'AdsSubscriptionController@adsSubscribe']);
+	$router->post('Ads/Unsubscribe', ['middleware' => 'auth', 'uses' => 'AdsSubscriptionController@adsUnsubscribe']);
+});
 
+/**
+ * API Route for banner
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Banner', ['middleware' => 'cors', 'uses' => 'BannerController@readAllBanners']);
+	$router->get('Banner/read/{idbanner}', ['middleware' => 'cors', 'uses' => 'BannerController@readBanner']);
+	$router->get('Banner/active/', ['middleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
+	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);	
+	$router->post('Banner/create/', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
+	$router->post('Banner/update/{idbanner}', ['middleware' => 'cors', 'uses' => 'BannerController@updateBanner']);
 });
 
