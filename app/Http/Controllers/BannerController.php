@@ -19,7 +19,7 @@ class BannerController extends Controller
     public function readAllBanners(){
                 
         $Banner  = Banner::orderBy('idbanner', 'desc')
-                        ->paginate(5);
+                        ->get();
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $Banner;
 
