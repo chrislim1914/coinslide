@@ -63,10 +63,8 @@ class ContentController extends Controller
              * then instantiate RedisController
              * hset everything on $taglist
              */
-            for ($i = 0; $i < count($taglist); $i++) {
-                
+            for ($i = 0; $i < count($taglist); $i++) {                
                 $redis = new RedisController();
-                echo $taglist[$i][0];
                 $redis->contentTag($taglist[$i][0], $idcontent);
             }
 
@@ -102,11 +100,31 @@ class ContentController extends Controller
             $utility = new UtilityController();
             $create_at = $utility->setDatetime();
 
-            $updateContents = Content::where('iduser', $iduser)
-                                        ->whereNull('createdate');
+            $updateContents = Content::where('iduser', $iduser)->whereNull('createdate');
+            
                 if($updateContents->update([
                                     'createdate'   => $create_at
                                     ])) {
+                    
+                    /**
+                     * instantiate TagController and save on tag table
+                     * then get id everytime its save on $taglist
+                     */
+                    $tagCont = new TagController();
+                    $taglist = $tagCont->createContentTag($request->tag);
+                    $idcontent = $Contents->id;
+
+                    $redis = new RedisController();
+                    $delTag = $redis->deleteContentTag($idcontent);
+
+                    /**
+                     * loop thru $taglist
+                     * then instantiate RedisController
+                     * hset everything on $taglist
+                     */
+                    for ($i = 0; $i < count($taglist); $i++) {
+                        $redis->contentTag($taglist[$i][0], $idcontent);
+                    }
                     return response()->json([
                         "message" => "Content is now publish."
                     ]);
@@ -173,7 +191,6 @@ class ContentController extends Controller
             for ($i = 0; $i < count($taglist); $i++) {
                 
                 $redis = new RedisController();
-                echo $taglist[$i][0];
                 $redis->contentTag($taglist[$i][0], $idcontent);
             }
 
@@ -214,6 +231,26 @@ class ContentController extends Controller
                                     'description'   => $request->description,
                                     'modifieddate'   => $modifieddate
                                     ])) {
+                    
+                    /**
+                     * instantiate TagController and save on tag table
+                     * then get id everytime its save on $taglist
+                     */
+                    $tagCont = new TagController();
+                    $taglist = $tagCont->createContentTag($request->tag);
+                    $idcontent = $Contents->id;
+
+                    $redis = new RedisController();
+                    $delTag = $redis->deleteContentTag($idcontent);
+
+                    /**
+                     * loop thru $taglist
+                     * then instantiate RedisController
+                     * hset everything on $taglist
+                     */
+                    for ($i = 0; $i < count($taglist); $i++) {
+                        $redis->contentTag($taglist[$i][0], $idcontent);
+                    }
                     return response()->json([
                         "message" => "Content Info Updated."
                     ]);
@@ -294,6 +331,9 @@ class ContentController extends Controller
                 $user = new UserInfoController();
                 $userphoto = $user->getUserPhoto($iduser);
 
+                $redistag = new RedisController();
+                $tag = $redistag->loadContentTag($idcontent);
+
                 //now we put all in an array and return
                 $array[] = [
                     'idcontent'     => $idcontent,
@@ -301,14 +341,15 @@ class ContentController extends Controller
                     'nickname'      => $nickname,
                     'userphoto'     => $userphoto,
                     'title'         => $title,
-                    'content'       => $content,
+                    // 'content'       => $content,
                     'description'   => $description,
                     'content_img'   => $content_img,
                     'createdate'    => $createdate,
                     'modifieddate'  => $modifieddate,
                     'timelapse'     => $timelapse,
                     'like'          => $countlike,
-                    'comment'       => $countComment
+                    'comment'       => $countComment,
+                    'tag'           => $tag
                 ];
 
             }
@@ -363,6 +404,9 @@ class ContentController extends Controller
                     $photo = $qwerty['profilephoto'];
                 }
 
+                $redistag = new RedisController();
+                $tag = $redistag->loadContentTag($idcontent);
+
                 $content = [
                     'idcontent' => $new->idcontent,
                     'iduser' => $new->iduser,
@@ -392,7 +436,8 @@ class ContentController extends Controller
             $contentData = [
                 'content'   => $content,
                 'like'      => $countlike,
-                'dislike'   => $countdislike
+                'dislike'   => $countdislike,
+                'tag'       => $tag
             ];
             return response()->json($contentData);    
         } else {
@@ -478,6 +523,10 @@ class ContentController extends Controller
                 $points = $countComment + ($countlike - $countdislike);
 
                 $hot = $utility->isItHot($createdate, $points);
+
+                $redistag = new RedisController();
+                $tag = $redistag->loadContentTag($idcontent);
+
                 
                 if($hot){
                     $array[] = [
@@ -495,7 +544,8 @@ class ContentController extends Controller
                         'like'          => $countlike,
                         'dislike'       => $countdislike,
                         'comment'       => $countComment,
-                        'points'        => $points
+                        'points'        => $points,
+                        'tag'       => $tag
                     ];
                 } else {
                     return response()->json([
@@ -587,6 +637,9 @@ class ContentController extends Controller
                 $points = $countComment + ($countlike - $countdislike);
 
                 $trending = $utility->isItTrending($createdate, $points);
+
+                $redistag = new RedisController();
+                $tag = $redistag->loadContentTag($idcontent);
                 
                 if($trending){
                     $array[] = [
@@ -604,7 +657,8 @@ class ContentController extends Controller
                         'like'          => $countlike,
                         'dislike'       => $countdislike,
                         'comment'       => $countComment,
-                        'points'        => $points
+                        'points'        => $points,
+                        'tag'       => $tag
                     ];
                 } else {
                     return response()->json([

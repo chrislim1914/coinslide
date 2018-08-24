@@ -242,4 +242,143 @@ class AdvertiseController extends Controller {
             ]);
         }                  
     }
+
+    /**
+     * method to create Ads
+     * 
+     * @param Request $request
+     */
+    public function createAds(Request $request){
+
+        $advertise = new Advertise();
+        $advertise->idadvertisers   = $request->idadvertisers;
+        $advertise->title           = $request->title;
+        $advertise->content         = $request->content;
+        $advertise->url             = $request->url;
+        $advertise->img             = $request->img;
+        $advertise->startdate       = $request->startdate;
+        $advertise->enddate         = $request->enddate;
+
+        if($advertise->save()) {
+
+            /**
+             * instantiate TagController and save on tag table
+             * then get id everytime its save on $taglist
+             */
+            $tagCont = new TagController();
+            $taglist = $tagCont->createAdsTag($request->tag);
+            $idads = $advertise->id;
+
+            /**
+             * loop thru $taglist
+             * then instantiate RedisController
+             * hset everything on $taglist
+             */
+            for ($i = 0; $i < count($taglist); $i++) {
+                
+                $redis = new RedisController();
+                $redis->adsTag($taglist[$i][0], $idads);
+            }
+
+            echo json_encode(
+                array("message" => "New Ads Created.")
+            );
+        } else {
+            echo json_encode(
+                array("message" => "Ads not created.")
+            );
+        }
+    }
+
+    /**
+     * method to create Ads
+     * 
+     * @param Request $request $id
+     */
+    public function updateAds(Request $request, $idads){
+
+        //find Ads info
+        $advertise = Advertise::where('idadvertise', $idads)->get();
+
+        if($advertise->count() > 0){
+            //update ads
+            $updateAdvertise = Advertise::where('idadvertise', $idads);
+                if($updateAdvertise->update([
+                                    'idadvertisers' => $request->idadvertisers,
+                                    'adcategory'    => $request->adcategory,
+                                    'title'         => $request->title,
+                                    'content'       => $request->content,
+                                    'url'           => $request->url,
+                                    'img'           => $request->img,
+                                    'startdate'     => $request->startdate,
+                                    'enddate'       => $request->enddate
+                                    ])) {
+
+                    /**
+                     * instantiate TagController and save on tag table
+                     * then get id everytime its save on $taglist
+                     */
+                    $tagCont = new TagController();
+                    $taglist = $tagCont->createAdsTag($request->tag);
+                    $idads = $advertise->id;
+
+                    $redis = new RedisController();
+                    $delTag = $redis->deleteAdsTag($idads);
+
+                    /**
+                     * loop thru $taglist
+                     * then instantiate RedisController
+                     * hset everything on $taglist
+                     */
+                    for ($i = 0; $i < count($taglist); $i++) {   
+                        $redis->adsTag($taglist[$i][0], $idads);
+                    }
+                    echo json_encode(
+                        array("message" => "Ads Info Updated.")
+                    );
+                } else {
+                    echo json_encode(
+                        array("message" => "there is nothing to update.")
+                    );
+                }
+        } else {
+            echo json_encode(
+                array("message" => "Ads not found.")
+            );
+        }
+    }
+
+    /**
+     * method to read single ads
+     * 
+     * @param $id
+     */
+    public function readAds($idads){
+
+        //find Ads info
+        $advertise = Advertise::where('idadvertise', $idads)->get();
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $advertise;
+
+        if($cursor->count() > 0 ) {                   
+            foreach($cursor as $new) {
+                return response()->json([
+                    'idadvertise' => $new->idadvertise,
+                    'idadvertisers' => $new->idadvertisers,
+                    'adcategory' => $new->adcategory,
+                    'title' => $new->title,
+                    'content' => $new->content,
+                    'url' => $new->url,
+                    'img' => $new->img,
+                    'startdate' => $new->startdate,
+                    'enddate' => $new->enddate,
+                ]);                
+            }
+        } else {
+            echo json_encode(
+                array("message" => "Ads not found.")
+            );
+        }
+    }
 }

@@ -6,22 +6,11 @@ use App\Http\Controllers\Controller;
 
 class RedisController extends Controller {
 
-    private $redis;
+    
     private $trredis;
-    private $otherdb = 1;
-    /**
-     * redis connection
-     */
-    public function __construct(){
-        $this->redis = new \Predis\Client([
-            'scheme' => getenv('REDIS_SCHEME'),
-            'host' => getenv('REDIS_HOST'),
-            'port' => getenv('REDIS_PORT'),
-            'password' => getenv('REDIS_PASS'),
-            'database' => $this->otherdb,
-        ]);
-    }
-
+    private $contentredis;
+    private $adsredis;
+    private $advertiserredis;
     /**
      * load total reward
      * 
@@ -56,68 +45,98 @@ class RedisController extends Controller {
      */
     public function contentTag($tagno, $idcontent){
 
-        $contentno = 'content'.$idcontent;
-        $this->redis->hset($tagno, $contentno, $idcontent);
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        $this->contentredis->lpush($idcontent, $tagno);
     }
 
+    /**
+     * method to load tag by content
+     */
+    public function loadContentTag($idcontent){
+
+        $start = 0;
+        $end = -1;
+
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        return $this->contentredis->lrange($idcontent, $start, $end);
+    }
+
+    /**
+     * method to delete tag
+     */
+    public function deleteContentTag($idcontent){
+
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        $this->contentredis->del($idcontent);
+    }
     /**
      * method to save ads tags
      * 
      * @param $tagno, $idads
      */
     public function adsTag($tagno, $idads){
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
 
-        $adsno = 'ads'.$idads;
-        $this->redis->hset($tagno, $adsno, $idads);
+        $this->adsredis->lpush($idads, $tagno);
+    }
+
+    public function loadAdsTag($idads){
+
+        $start = 0;
+        $end = -1;
+
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
+
+        return $this->adsredis->lrange($idads, $start, $end);
     }
 
     /**
-     * method to load all tags
-     * 
-     * @return response
+     * method to delete tag
      */
-    public function loadAllTags(){
+    public function deleteAdsTag($idads){
 
-        $tag = $this->redis->keys('*');
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
 
-        return response()->json($tag);
-    }
-
-    /**
-     * load all tags and its content or ads link
-     * 
-     * @return response
-     */
-    public function loadAll(){
-        $tag = $this->redis->keys('*');
-
-        for ($i = 0; $i < count($tag); $i++) {
-            $taglist = $this->redis->hgetall($tag[$i]);
-            $tags = $taglist;
-            $list[] = [$tag[$i] => $tags];
-        }
-
-        return response()->json($list);
-    }    
-
-    public function getAllTagofContentbyId(){
-
-        $tag = $this->redis->keys('*');
-
-        for ($i = 0; $i < count($tag); $i++) {
-            $taglist = $this->redis->hgetall($tag[$i]);
-            $tags = $taglist;
-            $list[] = $tags;
-            
-        }
-        print_r($list);
-        foreach($list as $key => $value){
-            foreach($value as $k => $v){
-                if (strpos($k, 'content') !== false){
-                    
-                }
-            }
-        }
+        $this->adsredis->del($idcontent);
     }
 }
 
