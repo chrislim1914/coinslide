@@ -71,4 +71,27 @@ class TagController extends Controller
         }
         return $TagContentlist;
     }
+
+    /**
+     * method to load all ads tag
+     * 
+     * @return response
+     */
+    public function loadAlladsTag(){
+        $contentTag = DB::table('tag_ads')
+                        ->select('ads_tag_name')
+                        ->groupby('ads_tag_name')
+                        ->orderBy('ads_tag_name', 'asc')
+                        ->get();
+        
+        if($contentTag->count() > 0){
+            return response()->json($contentTag);
+        }else{
+            return response()->json([
+                'message'   => 'no tag found'
+            ]);
+        }
+    }
+
+    
 }

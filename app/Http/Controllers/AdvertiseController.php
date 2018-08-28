@@ -70,7 +70,10 @@ class AdvertiseController extends Controller {
                 $adsSub = new AdsSubscriptionController();
                 $subscribe = $adsSub->countAdsSubscriptionById($idadvertise);
 
-                $request->iduser = null ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($request->iduser, $idadvertise);                
+                $request->iduser = null ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($request->iduser, $idadvertise);          
+                
+                $redistag = new RedisController();
+                $tag = $redistag->loadAdsTag($idadvertise);
 
                 $array[] = [
                     'idadvertise'   => $idadvertise,
@@ -83,7 +86,8 @@ class AdvertiseController extends Controller {
                     'img'           => $img,
                     'timelapse'     => $timelapse,
                     'subscribe'     => $subscribe,
-                    'isSubscribe'   => $isSubscribe
+                    'isSubscribe'   => $isSubscribe,
+                    'tag'           => $tag
                 ];
             }
 
@@ -158,7 +162,10 @@ class AdvertiseController extends Controller {
                 $adsSub = new AdsSubscriptionController();
                 $subscribe = $adsSub->countAdsSubscriptionById($idadvertise);
 
-                $request->iduser = null ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($request->iduser, $idadvertise);                
+                $request->iduser = null ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($request->iduser, $idadvertise);     
+                
+                $redistag = new RedisController();
+                $tag = $redistag->loadAdsTag($idadvertise);
 
                 $array[] = [
                     'idadvertise'   => $idadvertise,
@@ -171,7 +178,8 @@ class AdvertiseController extends Controller {
                     'img'           => $img,
                     'timelapse'     => $timelapse,
                     'subscribe'     => $subscribe,
-                    'isSubscribe'   => $isSubscribe
+                    'isSubscribe'   => $isSubscribe,
+                    'tag'           => $tag
                 ];
             }
             return response()->json($array);
@@ -353,32 +361,45 @@ class AdvertiseController extends Controller {
      * 
      * @param $id
      */
-    public function readAds($idads){
+    public function readAds($idadvertiser, $idads){
 
         //find Ads info
-        $advertise = Advertise::where('idadvertise', $idads)->get();
+        $advertise = Advertise::where('idadvertisers', $idadvertiser)->where('idadvertise', $idads)->get();
 
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $advertise;
+        $redistag = new RedisController();
+        $tag = $redistag->loadAdsTag($idads);
 
-        if($cursor->count() > 0 ) {                   
-            foreach($cursor as $new) {
-                return response()->json([
-                    'idadvertise' => $new->idadvertise,
+        if($advertise->count() > 0 ) {                   
+            foreach($advertise as $new) {
+                $viewadvertise =  [
+                    'idadvertise'   => $new->idadvertise,
                     'idadvertisers' => $new->idadvertisers,
-                    'adcategory' => $new->adcategory,
-                    'title' => $new->title,
-                    'content' => $new->content,
-                    'url' => $new->url,
-                    'img' => $new->img,
-                    'startdate' => $new->startdate,
-                    'enddate' => $new->enddate,
-                ]);                
+                    'adcategory'    => $new->adcategory,
+                    'title'         => $new->title,
+                    'content'       => $new->content,
+                    'url'           => $new->url,
+                    'img'           => $new->img,
+                    'startdate'     => $new->startdate,
+                    'enddate'       => $new->enddate,
+                    'tag'           => $tag
+                ];                
             }
         } else {
-            echo json_encode(
-                array("message" => "Ads not found.")
-            );
+            $viewadvertise = ["message" => "Ads not found."];
         }
+
+        $otherAdsByAdvertiser = Advertise::where('idadvertise', '<>', $idads)
+                                            ->where('idadvertisers', $idadvertiser)
+                                            ->orderBy('idadvertise', 'desc')->get();
+
+        if($otherAdsByAdvertiser->count() <= 0 ) { 
+            $otherAdsByAdvertiser = ["message" => "no other ads found."];
+        }
+
+        $arrayData[] = [
+            'toviewAds' => $viewadvertise,
+            'otherAds'  => $otherAdsByAdvertiser,
+        ];
+        return response()->json($arrayData);
     }
 }

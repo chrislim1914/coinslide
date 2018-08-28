@@ -90,6 +90,7 @@ class RedisController extends Controller {
 
         $this->contentredis->del($idcontent);
     }
+    
     /**
      * method to save ads tags
      * 

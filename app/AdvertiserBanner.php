@@ -4,11 +4,9 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class TagContent extends Model
+class AdvertiserBanner extends Model
 {
     public $timestamps = false;
-
-    protected $connection = 'mysql';
 
     /**
      * The attributes that are mass assignable.
@@ -16,7 +14,6 @@ class TagContent extends Model
      * @var array
      */
     protected $fillable = [
-        'idtag', 'content_tag_name', 
+        'idadvertiser_banner', 'idadvertiser', 'img', 'position', 'use', 
     ];
-
 }

@@ -341,7 +341,7 @@ class ContentController extends Controller
                     'nickname'      => $nickname,
                     'userphoto'     => $userphoto,
                     'title'         => $title,
-                    // 'content'       => $content,
+                    'content'       => $content,
                     'description'   => $description,
                     'content_img'   => $content_img,
                     'createdate'    => $createdate,

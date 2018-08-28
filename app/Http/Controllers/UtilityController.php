@@ -94,10 +94,10 @@ class UtilityController extends Controller
         $imagewidth = $image->width();
         $imageheight = $image->height();
         
-        if($imagewidth == 1200 && $imageheight == 380) {
+        if($imagewidth == 1100 && $imageheight == 450) {
             return $this->image = $image;
         } else {
-            return $this->image = Image::make($newImage)->resize(1100, 448);
+            return $this->image = Image::make($newImage)->resize(1100, 450);
         }
     }
 
