@@ -45,6 +45,24 @@ $router->group(['prefix' => 'api/'], function($router)
 	//password reset
 	$router->post('/password/email', ['middleware' => 'cors', 'uses' => 'PasswordController@postEmail']);
 	$router->post('/password/reset/{token}', ['middleware' => 'cors', 'uses' => 'PasswordController@postReset']);
+
+	//check email for duplicate
+	$router->post('/checkemail', ['middleware' => 'cors', 'uses' => 'UserController@findDuplicateEmail']);
+	$router->post('/checknickname', ['middleware' => 'cors', 'uses' => 'UserController@findDuplicateNickname']);
+});
+
+/**
+ * SNS routes
+ */
+$router->group(['prefix' => '/'], function($router){
+	//web app
+    $router->get('google', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogle']);		
+	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallback']);
+
+	//mobile app
+    $router->get('googleMobile', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogleMobile']);		
+	$router->get('googleMobile/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallbackMobile']);
+
 });
 
 /**
@@ -143,6 +161,9 @@ $router->group(['prefix' => 'api/'], function($router)
 	//advertiser
 	$router->get('Advertiser/{idadvertiser}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@advertiserInfo']);
 	$router->get('Advertiser/{idadvertiser}/Ads/{idads}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
+
+	//tag routes
+	$router->get('advertiserTag', ['middleware' => 'cors', 'uses' => 'TagController@loadAlladvertiserTag']);
 	
 });
 
@@ -156,5 +177,16 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->get('totalreward', ['middleware' => 'cors', 'uses' => 'RedisController@totalreward']);
 	$router->get('loadContentTag/{idcontent}', ['middleware' => 'cors', 'uses' => 'RedisController@loadContentTag']);
 	$router->get('loadAdsTag/{idads}', ['middleware' => 'cors', 'uses' => 'RedisController@loadAdsTag']);
+});
+
+/**
+ * API Route for refferal
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('refferal', ['middleware' => 'cors', 'uses' => 'RefferalController@loadAllRefferal']);
+	$router->post('refferal/register', ['middleware' => 'cors', 'uses' => 'RefferalController@insertRefferal']);
 });
 

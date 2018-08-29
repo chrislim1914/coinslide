@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 use App\Http\Controllers\UtilityController;
+use App\Http\Controllers\RedisController;
 
 class AdvertiserController extends Controller
 {
@@ -42,11 +43,16 @@ class AdvertiserController extends Controller
             $ads = ['message' => 'advertiser dont have advertisement yet!'];
         }
 
+        //load advertiser tags
+        $tag = new RedisController();
+        $advertisertag = $tag->loadAdvertiserTag($idadvertiser);
+
         //load all in an array
         $arrayData[] = [
             'advertiser' => $advertiser,
             'banner'     => $banner,
             'ads'        => $ads,
+            'tag'        => $advertisertag
         ];
 
         return response()->json($arrayData);
@@ -80,6 +86,25 @@ class AdvertiserController extends Controller
          */
 
         if($advertiser->save()) {
+
+             /**
+             * instantiate TagController and save on tag table
+             * then get id everytime its save on $taglist
+             */
+            $tagCont = new TagController();
+            $taglist = $tagCont->createAdvertiserTag($request->tag);
+            $idads = $advertiser->id;
+
+            /**
+             * loop thru $taglist
+             * then instantiate RedisController
+             * hset everything on $taglist
+             */
+            for ($i = 0; $i < count($taglist); $i++) {
+                
+                $redis = new RedisController();
+                $redis->advertiserTag($taglist[$i][0], $idads);
+            }
              //send mail here
                 // $verificationCode = base64_encode(str_random(12));
                 // $send = new SendMail();
@@ -91,6 +116,39 @@ class AdvertiserController extends Controller
             return response()->json([
                 'message'   => 'failed to create user.'
             ]);
+        }
+    }
+
+    /**
+     * method to save the newly registered advertiser password
+     * 
+     * @param Request $request, $id
+     * 
+     * @return response
+     */
+    public function insertPassword(Request $request, $id){
+
+        //first retrieved the advertiser
+        $advertiser = Advertiser::where('idadvertiser', $id)->get();
+
+        if($advertiser->count() > 0){
+            $hash = new UtilityController();
+            $insertPass = Advertiser::where('idadvertiser', $id);
+            if($insertPass->update([
+                'password' => $hash->hash($request->password)//password hash
+            ])){
+                echo json_encode(
+                    array("message" => "Password is set.")
+                );
+            } else {
+                echo json_encode(
+                    array("message" => "Failed to set password.")
+                );
+            }
+        } else {
+            echo json_encode(
+                array("message" => "advertiser not found.")
+            );
         }
     }
 }

@@ -108,6 +108,9 @@ class RedisController extends Controller {
         $this->adsredis->lpush($idads, $tagno);
     }
 
+    /**
+     * method to load tag by ads
+     */
     public function loadAdsTag($idads){
 
         $start = 0;
@@ -138,6 +141,58 @@ class RedisController extends Controller {
         ]);
 
         $this->adsredis->del($idcontent);
+    }
+
+    /**
+     * method to save advertiser tags
+     * 
+     * @param $tagno, $idads
+     */
+    public function advertiserTag($tagno, $idads){
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        $this->advertiserredis->lpush($idads, $tagno);
+    }
+
+    /**
+     * method to load tag by ads
+     */
+    public function loadAdvertiserTag($idads){
+
+        $start = 0;
+        $end = -1;
+
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        return $this->advertiserredis->lrange($idads, $start, $end);
+    }
+
+    /**
+     * method to delete tag
+     */
+    public function deleteAdvertiserTag($idads){
+
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        $this->advertiserredis->del($idcontent);
     }
 }
 

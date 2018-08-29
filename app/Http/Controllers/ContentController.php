@@ -267,6 +267,91 @@ class ContentController extends Controller
     }
 
     /**
+     * method to get one content info
+     * 
+     * @param $id
+     * 
+     * @return response
+     */
+    public function contentReadOne($idcontent){
+
+        //create query contents inner joint users
+        $content = DB::table('contents')
+                        ->join('users', 'contents.iduser', '=', 'users.iduser')               
+                        ->select('contents.idcontent', 'contents.iduser', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
+                                'contents.createdate', 'contents.modifieddate', 'contents.delete')
+                        ->where('contents.delete', 0)
+                        ->where('contents.idcontent', $idcontent)
+                        ->get();          
+        
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $content;
+
+        /**
+         * take the Date and Time Controller to set current date
+         * 
+         * then use the timelapse function
+         */
+        $current = new UtilityController();
+
+        if($cursor->count() > 0 ) {                   
+            foreach($cursor as $new) {
+                $iduser = $new->iduser;
+
+                //retrived user photo
+                $userinfo = DB::connection('mongodb')->collection('userinformations')
+                ->select('profilephoto')
+                ->where('iduser', '=', $iduser)
+                ->get();
+
+                foreach($userinfo as $qwerty){
+                    $photo = $qwerty['profilephoto'];
+                }
+
+                $redistag = new RedisController();
+                $tag = $redistag->loadContentTag($idcontent);
+
+                $content = [
+                    'idcontent' => $new->idcontent,
+                    'iduser' => $new->iduser,
+                    'photo' => $photo,
+                    'nickname' => $new->nickname,
+                    'title' => $new->title,
+                    'content' => $new->content,
+                    'description' => $new->description,
+                    'createdate' => $new->createdate,
+                    'modifieddate' => $new->modifieddate,
+                    'timelapse' => $current->timeLapse($new->createdate)
+                ];                           
+            }
+
+            /**
+             * get LikeController Instance
+             * 
+             * retrieved
+             *  * like count
+             *  * dislike count
+             */
+            $like = new LikeController();
+            $countlike = $like->countLike($idcontent);
+            $countdislike = $like->countDislike($idcontent);
+
+            //append all the data needed to display for content
+            $contentData = [
+                'content'   => $content,
+                'like'      => $countlike,
+                'dislike'   => $countdislike,
+                'tag'       => $tag
+            ];
+            return response()->json($contentData);    
+        } else {
+            return response()->json([
+                "message" => "Content not found."
+            ]);
+        }        
+    }
+
+    /**
      * method to read all content in desc order by number of likes
      * inner join users and likes
      * 
@@ -363,91 +448,6 @@ class ContentController extends Controller
     }
 
     /**
-     * method to get one content info
-     * 
-     * @param $id
-     * 
-     * @return response
-     */
-    public function contentReadOne($idcontent){
-
-        //create query contents inner joint users
-        $content = DB::table('contents')
-                        ->join('users', 'contents.iduser', '=', 'users.iduser')               
-                        ->select('contents.idcontent', 'contents.iduser', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', 'contents.delete')
-                        ->where('contents.delete', 0)
-                        ->where('contents.idcontent', $idcontent)
-                        ->get();          
-        
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $content;
-
-        /**
-         * take the Date and Time Controller to set current date
-         * 
-         * then use the timelapse function
-         */
-        $current = new UtilityController();
-
-        if($cursor->count() > 0 ) {                   
-            foreach($cursor as $new) {
-                $iduser = $new->iduser;
-
-                //retrived user photo
-                $userinfo = DB::connection('mongodb')->collection('userinformations')
-                ->select('profilephoto')
-                ->where('iduser', '=', $iduser)
-                ->get();
-
-                foreach($userinfo as $qwerty){
-                    $photo = $qwerty['profilephoto'];
-                }
-
-                $redistag = new RedisController();
-                $tag = $redistag->loadContentTag($idcontent);
-
-                $content = [
-                    'idcontent' => $new->idcontent,
-                    'iduser' => $new->iduser,
-                    'photo' => $photo,
-                    'nickname' => $new->nickname,
-                    'title' => $new->title,
-                    'content' => $new->content,
-                    'description' => $new->description,
-                    'createdate' => $new->createdate,
-                    'modifieddate' => $new->modifieddate,
-                    'timelapse' => $current->timeLapse($new->createdate)
-                ];                           
-            }
-
-            /**
-             * get LikeController Instance
-             * 
-             * retrieved
-             *  * like count
-             *  * dislike count
-             */
-            $like = new LikeController();
-            $countlike = $like->countLike($idcontent);
-            $countdislike = $like->countDislike($idcontent);
-
-            //append all the data needed to display for content
-            $contentData = [
-                'content'   => $content,
-                'like'      => $countlike,
-                'dislike'   => $countdislike,
-                'tag'       => $tag
-            ];
-            return response()->json($contentData);    
-        } else {
-            return response()->json([
-                "message" => "Content not found."
-            ]);
-        }        
-    }
-
-    /**
      * method to load hot content
      * 
      * function use for a content to be on hot list is
@@ -507,6 +507,7 @@ class ContentController extends Controller
                  *  * like count
                  *  * comment count
                  *  * user profile photo
+                 *  * tags
                  */
                 $like = new LikeController();
                 $countlike = $like->countLike($idcontent);
@@ -562,10 +563,10 @@ class ContentController extends Controller
     }
 
     /**
-     * method to load hot content
+     * method to load trending content
      * 
-     * function use for a content to be on hot list is
-     * 72 hours after created
+     * function use for a content to be on trending list is
+     * 360 hours after created
      * comment + (like - dislike)
      * sort desc
      * 
@@ -621,6 +622,7 @@ class ContentController extends Controller
                  *  * like count
                  *  * comment count
                  *  * user profile photo
+                 *  * tags
                  */
                 $like = new LikeController();
                 $countlike = $like->countLike($idcontent);

@@ -97,6 +97,7 @@ class UserController extends Controller
                 $userinfo->mStatus      = $request->maritalstatus;
                 
                 $userinfo->save();
+                    //save the refferal here
 
                 return response()->json([
                     "message" => "New client Created."
@@ -312,5 +313,56 @@ class UserController extends Controller
                 "message" => "User not found."
             ]);
         }
+    }
+
+    /**
+     * method to search for duplicate email
+     * 
+     * @param Request $request
+     * 
+     * @return response
+     */
+    public function findDuplicateEmail(Request $request){
+
+        //check if email already registered
+        $Users  = User::where('email', $request->email)->get();
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $Users;
+
+        if($cursor->count() > 0 ){
+            return response()->json([
+                'message'  =>  'Email is already in the database'
+            ]);
+        }else{
+            return response()->json([
+                'message'  =>  'Email is not yet in the database'
+                ]);
+        }
+    }
+
+     /**
+     * method to search for duplicate email
+     * 
+     * @param Request $request
+     * 
+     * @return response
+     */
+    public function findDuplicateNickname(Request $request){
+
+        $check = '';
+        //check if email already registered
+        $Users  = User::where('nickname', $request->nickname)->get();
+
+        //the cursor method may be used to greatly reduce your memory usage:
+        $cursor = $Users;
+
+        if($cursor->count() > 0 ){
+            $check = true;
+        }else{
+            $check = false;
+        }
+
+        return response()->json($check);
     }
 }
