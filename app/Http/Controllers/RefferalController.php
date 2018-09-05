@@ -35,7 +35,7 @@ class RefferalController extends Controller
                 'message'   =>  'the refferal name dont exist.'
             ]);
         }
-
+        
         //ok save the new refferal info
         $refferal = new Refferal();
         $refferal->recommended_by_nickname = $request->recommended_by_nickname;

@@ -35,7 +35,7 @@ class AuthController extends Controller
         try {
 
             if (! $token = $this->jwt->attempt($request->only('email', 'password'))) {
-                return response()->json(['message' => 'email, password not correct'], 404);
+                return response()->json(['message' => 'email, password not correct'], 200);
             }
 
         } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {

@@ -25,7 +25,7 @@ $router->group(['prefix' => 'api/'], function($router)
 	//login
 	$router->post('login', ['middleware' => 'cors', 'uses' => 'AuthController@login']);
 	//logout
-	$router->post('logout', ['middleware' => 'cors', 'uses' => 'AuthController@logout']);
+	$router->post('logout', ['middleware' => 'auth', 'uses' => 'AuthController@logout']);
 	//refresh token
 	$router->post('refreshToken', ['middleware' => 'cors', 'uses' => 'AuthController@refresh']);
 	//get User Info Authenticated by JWT

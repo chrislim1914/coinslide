@@ -63,51 +63,36 @@ class UserController extends Controller
     public function createUser(Request $request){
 
         //check if email already registered
-        $Users  = User::where('email', $request->email)->get();
+        $Users  = User::where('email', $request->email)->get();        
 
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $Users;        
+        $hash = new UtilityController();        
+        $User = new User();
+        // $User->first_name = $request->first_name;
+        // $User->last_name = $request->last_name;
+        $User->email = $request->email;
+        $User->nickname = $request->nickname;
+        $User->password = $hash->hash($request->password);//password hash
+        
+        if($User->save()) {
+            //retrieved the new inserted iduser
+            $lastid = $User->id;
 
-        if($cursor->count() > 0 ) {
-            return response()->json([
-                "message" => "email already registered."
-            ]);
-        } else {
-
-            $hash = new UtilityController();        
-            $User = new User();
-            $User->first_name = $request->first_name;
-            $User->last_name = $request->last_name;
-            $User->email = $request->email;
-            $User->nickname = $request->nickname;
-            $User->password = $hash->hash($request->password);//password hash
+            //save it to userinfo collections
+            $userinfo = new UserInfo();
+            $userinfo->iduser       = $lastid;
+            $userinfo->gender       = $request->gender;
+            $userinfo->profilephoto = '';
+            $userinfo->birth        = $request->birthdate;
+            $userinfo->country      = $request->country;
+            $userinfo->city         = $request->city;
+            $userinfo->mStatus      = $request->maritalstatus;
             
-            if($User->save()) {
-                //retrieved the new inserted iduser
-                $lastid = $User->id;
+            $userinfo->save();
 
-                //save it to userinfo collections
-                $userinfo = new UserInfo();
-                $userinfo->iduser       = $lastid;
-                $userinfo->gender       = $request->gender;
-                $userinfo->profilephoto = '';
-                $userinfo->birth        = $request->birthdate;
-                $userinfo->country      = $request->country;
-                $userinfo->city         = $request->city;
-                $userinfo->mStatus      = $request->maritalstatus;
-                
-                $userinfo->save();
-                    //save the refferal here
-
-                return response()->json([
-                    "message" => "New client Created."
-                ]);
-            } else {
-                return response()->json([
-                    "message" => "failed in registering new client."
-                ]);
-            }
-        }       
+            return response()->json(true);
+        } else {
+            return response()->json(false);
+        }  
     }
 
     /**
@@ -149,8 +134,8 @@ class UserController extends Controller
         ->where('iduser', $id);
 
         if($updateUser->update([
-            'first_name'    => $request->first_name,
-            'last_name'     => $request->last_name,
+            // 'first_name'    => $request->first_name,
+            // 'last_name'     => $request->last_name,
             'nickname'      => $request->nickname,
                     ])) 
         {
@@ -324,6 +309,8 @@ class UserController extends Controller
      */
     public function findDuplicateEmail(Request $request){
 
+        $check = '';
+
         //check if email already registered
         $Users  = User::where('email', $request->email)->get();
 
@@ -331,14 +318,12 @@ class UserController extends Controller
         $cursor = $Users;
 
         if($cursor->count() > 0 ){
-            return response()->json([
-                'message'  =>  'Email is already in the database'
-            ]);
+            $check = true;
         }else{
-            return response()->json([
-                'message'  =>  'Email is not yet in the database'
-                ]);
+            $check = false;
         }
+
+        return response()->json($check);
     }
 
      /**

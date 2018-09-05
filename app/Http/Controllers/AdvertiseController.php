@@ -184,7 +184,7 @@ class AdvertiseController extends Controller {
             }
             return response()->json($array);
         } else {
-            return response()-json([
+            return response()->json([
                 'message' => 'no Ads found.'
             ]);
         }
