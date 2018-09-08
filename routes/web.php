@@ -25,7 +25,7 @@ $router->group(['prefix' => 'api/'], function($router)
 	//login
 	$router->post('login', ['middleware' => 'cors', 'uses' => 'AuthController@login']);
 	//logout
-	$router->post('logout', ['middleware' => 'auth', 'uses' => 'AuthController@logout']);
+	$router->post('logout', ['middleware' => ['cors','auth'], 'uses' => 'AuthController@logout']);
 	//refresh token
 	$router->post('refreshToken', ['middleware' => 'cors', 'uses' => 'AuthController@refresh']);
 	//get User Info Authenticated by JWT
@@ -55,13 +55,93 @@ $router->group(['prefix' => 'api/'], function($router)
  * SNS routes
  */
 $router->group(['prefix' => '/'], function($router){
-	//web app
+	//google web app
     $router->get('google', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogle']);		
 	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallback']);
 
-	//mobile app
+	//google mobile app
     $router->get('googleMobile', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogleMobile']);		
 	$router->get('googleMobile/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallbackMobile']);
+
+	//facebook web app
+    // $router->get('facebook', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToFacebook']);		
+	// $router->get('facebook/callback', ['middleware' => 'cors', 'uses' => 'SnsController@facebookCallback']);
+	$router->get('facebook', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb) {
+		$login_link = $fb
+            ->getRedirectLoginHelper()
+            ->getLoginUrl('https://api.coinslide.io/facebook/callback/', ['email']);
+    
+    		echo '<a href="' . $login_link . '">Log in with Facebook</a>';
+	});
+	$router->get('facebook/callback/', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb)
+	{
+		// Obtain an access token.
+		try {
+			$token = $fb->getAccessTokenFromRedirect();
+		} catch (Facebook\Exceptions\FacebookSDKException $e) {
+			
+			return response()->json([
+				'message'	=>	$e->getMessage()
+			]);
+		}
+		$token = $fb->getAccessTokenFromRedirect();
+		// Access token will be null if the user denied the request
+		// or if someone just hit this URL outside of the OAuth flow.
+		if (! $token) {
+			// Get the redirect helper
+			$helper = $fb->getRedirectLoginHelper();
+
+			if (! $helper->getError()) {
+				return response()->json([
+					'message'	=>	'Unauthorized action.'
+				]);
+			}
+
+			// User denied the request
+			return response()->json([
+				'message'	=> $helper->getErrorReason(),
+			]);
+
+		}
+
+		if (! $token->isLongLived()) {
+			// OAuth 2.0 client handler
+			$oauth_client = $fb->getOAuth2Client();
+
+			// Extend the access token.
+			try {
+				$token = $oauth_client->getLongLivedAccessToken($token);
+			} catch (Facebook\Exceptions\FacebookSDKException $e) {
+				dd($e->getMessage());
+			}
+		}
+
+		$fb->setDefaultAccessToken($token);
+
+		// Save for later
+		Session::put('fb_user_access_token', (string) $token);
+
+		// Get basic info on the user from Facebook.
+		try {
+			$response = $fb->get('/me?fields=id,name,email');
+		} catch (Facebook\Exceptions\FacebookSDKException $e) {
+			dd($e->getMessage());
+		}
+
+		// Convert the response to a `Facebook/GraphNodes/GraphUser` collection
+		$facebook_user = $response->getGraphUser();
+
+		// Create the user if it does not exist or update the existing entry.
+		// This will only work if you've added the SyncableGraphNodeTrait to your User model.
+		// $user = App\User::createOrUpdateGraphNode($facebook_user);
+
+		// Log the user into Laravel
+		// Auth::login($user);
+
+		return response()->json(
+			['token'	=> $token]
+		);
+	});
 
 });
 
@@ -124,7 +204,7 @@ $router->group(['prefix' => 'api/'], function($router)
 
 	//Subscription, subscribe and unsubscribe
 	$router->get('User/{iduser}/SubscriptionList', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionList']);
-	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionHistory']);
+	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'cors', 'uses' => 'UserActivityController@subscriptionHistory']);
 	$router->post('Ads/Subscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsSubscribe']);
 	$router->post('Ads/Unsubscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsUnsubscribe']);
 });
@@ -160,7 +240,7 @@ $router->group(['prefix' => 'api/'], function($router)
 
 	//advertiser
 	$router->get('Advertiser/{idadvertiser}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@advertiserInfo']);
-	$router->get('Advertiser/{idadvertiser}/Ads/{idads}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
+	$router->post('Advertiser/Ads', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
 
 	//tag routes
 	$router->get('advertiserTag', ['middleware' => 'cors', 'uses' => 'TagController@loadAlladvertiserTag']);

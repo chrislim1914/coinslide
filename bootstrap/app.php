@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 require_once __DIR__.'/../vendor/autoload.php';
 
 try {
@@ -105,6 +105,7 @@ $app->register(Tymon\JWTAuth\Providers\LumenServiceProvider::class);
 $app->register(Illuminate\Support\Facades\Auth::class);
 $app->register(\SocialiteProviders\Manager\ServiceProvider::class);
 $app->register(SammyK\LaravelFacebookSdk\LaravelFacebookSdkServiceProvider::class);
+$app->register(\ciptohadi\LumenNotifications\LumenNotificationsServiceProvider::class);
 /*
 |--------------------------------------------------------------------------
 | configure files

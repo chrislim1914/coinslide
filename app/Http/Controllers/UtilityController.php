@@ -12,6 +12,7 @@ use App\Http\Controllers\Controller;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Carbon\CarbonPeriod;
 
 class UtilityController extends Controller
 {
@@ -246,5 +247,51 @@ class UtilityController extends Controller
         } else {
             return false;
         }
+    }
+
+    /**
+     * method to iterate date range
+     * 
+     * @param $range
+     * ex. 1week, 1month, etc
+     * 
+     * @return $periodArray
+     */
+    public function dateRange($range){
+        if($range == null){
+            return response()->json([
+                'message'   =>  'no search period'
+            ]);
+        }
+
+        $dateParam = ltrim($range, 1);
+
+        $endDate = Carbon::now();
+        $end = $endDate->toDateString();
+
+        if($dateParam === 'week'){
+            $startDate = $endDate->subWeek();
+            $start = $startDate->toDateString();
+        }else{
+            $startDate = $endDate->subMonth($range[0]);
+            $start = $startDate->toDateString();
+        }
+       
+        $period = CarbonPeriod::create($start, '1 days', $end);
+
+        foreach ($period as $key => $date) {
+            
+            $date->format('Y-m-d');
+
+            $rediodArray[] = $date->toDateString();
+        }
+        
+        return $rediodArray;
+    }
+
+    public function checkdateRange($date){
+        $date = $date->toDateString();
+
+        
     }
 }

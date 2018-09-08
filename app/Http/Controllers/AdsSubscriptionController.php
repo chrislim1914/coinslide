@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\User;
-use App\Adversite;
+use App\Advertise;
+use App\Http\Controllers\UserActivityController;
 use App\AdsSubscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UtilityController;
+use Illuminate\Support\Carbon;
 
 class AdsSubscriptionController extends Controller
 {   
@@ -27,21 +29,34 @@ class AdsSubscriptionController extends Controller
         if($this->findUser($request->iduser)){
             if($this->findAds($request->idadvertise)){
 
-                $subscribe = new AdsSubscription();
-                $subscribe->iduser = $request->iduser;
-                $subscribe->idadvertise = $request->idadvertise;
-                $subscribe->startdate = $utility->setDatetime();
+                //check if the user is already subscribe
+                $check = $this->checkIfSubscribe($request->iduser, $request->idadvertise);
 
-                if($subscribe->save()) {
+                if($check){
                     return response()->json([
-                        "message" => "Subscribed!"
+                        "message" => "you already subscribe on this ads!"
                     ]);
-                } else {
-                    return response()->json([
-                        "message" => "Failed to subscribe!"
-                    ]);
+                }else{
+                    $subscribe = new AdsSubscription();
+                    $subscribe->iduser = $request->iduser;
+                    $subscribe->idadvertise = $request->idadvertise;
+                    $subscribe->startdate = $utility->setDatetime();                    
+
+                    if($subscribe->save()) {
+                        
+                        $subdate = $subscribe->startdate->toDateString();
+                        $activity = new UserActivityController();
+                        $saveActivity = $activity->createUserActivitySub($subscribe->iduser, $subdate, $subscribe->idadvertise, $subscribe->id);
+
+                        return response()->json([
+                            "message" => "Subscribed!"
+                        ]);
+                    } else {
+                        return response()->json([
+                            "message" => "Failed to subscribe!"
+                        ]);
+                    }
                 }
-
             } else {
                 return response()->json([
                     "message" => "Error retrieving ads info!"
@@ -65,7 +80,7 @@ class AdsSubscriptionController extends Controller
     public function adsUnsubscribe(Request $request){
 
         $utility = new UtilityController(); 
-
+        $enddate = $utility->setDatetime();
         $check = AdsSubscription::where('iduser', $request->iduser)
                                 ->where('idadvertise', $request->idadvertise)
                                 ->where('enddate', null)
@@ -74,7 +89,14 @@ class AdsSubscriptionController extends Controller
         if($check->count() > 0 ){
             foreach($check as $new){
                 $unsubscribe = AdsSubscription::where('idsubscription', $new->idsubscription);
-                if($unsubscribe->update(["enddate" => $utility->setDatetime()])) {
+
+                if($unsubscribe->update(["enddate" => $enddate])) {
+
+                    $subdate = $enddate->toDateString();
+
+                    $activity = new UserActivityController();
+                    $saveActivity = $activity->createUserActivityUnsub($request->iduser, $subdate, $request->idadvertise, $new->idsubscription);
+
                     return response()->json([
                         "message" => "unsubscribe!"
                     ]);
@@ -162,12 +184,25 @@ class AdsSubscriptionController extends Controller
      */
     private function findAds($idadvertise){
         //find advertise
-        $ads = AdsSubscription::where('idadvertise', $idadvertise)
+        $ads = Advertise::where('idadvertise', $idadvertise)
+                            ->where('enddate', null)
                             ->get();
 
         if($ads->count() > 0){
             return true;
         } else {
+            return false;
+        }
+    }
+
+    public function checkIfSubscribe($iduser, $idadvertise){
+        $check = AdsSubscription::where('iduser', $iduser)
+                                ->where('idadvertise', $idadvertise)
+                                ->where('enddate', null)
+                                ->get();
+        if($check->count() > 0){
+            return true;
+        }else{
             return false;
         }
     }
