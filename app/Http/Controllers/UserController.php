@@ -69,6 +69,7 @@ class UserController extends Controller
         $User = new User();
         // $User->first_name = $request->first_name;
         // $User->last_name = $request->last_name;
+        $User->phone = $request->phone;
         $User->email = $request->email;
         $User->nickname = $request->nickname;
         $User->password = $hash->hash($request->password);//password hash

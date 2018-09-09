@@ -6,6 +6,7 @@ use App\Reply;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Http\Controllers\UtilityController;
+use Illuminate\Support\Facades\DB;
 
 class ReplyController extends Controller {
 
@@ -137,6 +138,17 @@ class ReplyController extends Controller {
                 $modifieddate = $new->modifieddate;
                 $timelapse    = $current->timeLapse($new->createdate);
 
+                $userinfo = DB::connection('mongodb')->collection('userinformations')
+                        ->project(['_id' => 0])
+                        ->select('profilephoto')
+                        ->where('iduser', '=', $iduser)
+                        ->get();
+
+                $user = DB::table('users')
+                        ->select('users.nickname')
+                        ->where('users.iduser', $iduser)
+                        ->get();
+
                 $array[] = [
                     'idreply'     => $idreply,
                     'idcomment'   => $idcomment,
@@ -144,8 +156,11 @@ class ReplyController extends Controller {
                     'content'     => $content,
                     'createdate'  => $createdate,
                     'modifieddate'=> $modifieddate,
-                    'timelapse'   => $timelapse
+                    'timelapse'   => $timelapse,
+                    'usernickname'  => $user,
+                    'profilephoto' => $userinfo
                 ];
+                
             }
             
             return response()->json($array);

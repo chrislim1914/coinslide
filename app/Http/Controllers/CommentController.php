@@ -139,21 +139,35 @@ class CommentController extends Controller {
             foreach($cursor as $new){
                 $idcomment      = $new->idcomment;
                 $idcontent      = $new->idcontent;
-                $iduser       = $new->iduser;
+                $iduser         = $new->iduser;
                 $content        = $new->content;
                 $createdate     = $new->createdate;
                 $modifieddate   = $new->modifieddate;
-                $timelapse      = $current->timeLapse($new->createdate);
+                $timelapse      = $current->timeLapse($new->createdate);                
+
+                $userinfo = DB::connection('mongodb')->collection('userinformations')
+                        ->project(['_id' => 0])
+                        ->select('profilephoto')
+                        ->where('iduser', '=', $iduser)
+                        ->get();
+
+                $user = DB::table('users')
+                        ->select('users.nickname')
+                        ->where('users.iduser', $iduser)
+                        ->get();
 
                 $array[] = [
                     'idcomment'     => $idcomment,
-                    'idcontent'       => $idcontent,
-                    'iduser'      => $iduser,
+                    'idcontent'     => $idcontent,
+                    'userinfo'      => $iduser,
                     'content'       => $content,
                     'createdate'    => $createdate,
                     'modifieddate'  => $modifieddate,
-                    'timelapse'     => $timelapse
+                    'timelapse'     => $timelapse,
+                    'usernickname'  => $user,
+                    'profilephoto' => $userinfo
                 ];
+                
             }
             
             return response()->json($array);
