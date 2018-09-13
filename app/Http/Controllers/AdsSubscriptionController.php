@@ -34,7 +34,8 @@ class AdsSubscriptionController extends Controller
 
                 if($check){
                     return response()->json([
-                        "message" => "you already subscribe on this ads!"
+                        'message'   =>  'you already subscribe on this ads!',
+                        'result'    =>  false
                     ]);
                 }else{
                     $subscribe = new AdsSubscription();
@@ -49,22 +50,26 @@ class AdsSubscriptionController extends Controller
                         $saveActivity = $activity->createUserActivitySub($subscribe->iduser, $subdate, $subscribe->idadvertise, $subscribe->id);
 
                         return response()->json([
-                            "message" => "Subscribed!"
+                            'message'   => '',
+                            'result'    =>  true
                         ]);
                     } else {
                         return response()->json([
-                            "message" => "Failed to subscribe!"
+                            'message'   => 'Failed to subscribe!',
+                            'result'    =>  false
                         ]);
                     }
                 }
             } else {
                 return response()->json([
-                    "message" => "Error retrieving ads info!"
+                    'message'   => 'Error retrieving ads info!',
+                    'result'    =>  false
                 ]);
             }
         } else {
             return response()->json([
-                "message" => "must login to subscribe!"
+                'message'   => 'must login to subscribe!',
+                'result'    =>  false
             ]);
         }
     }
@@ -98,17 +103,20 @@ class AdsSubscriptionController extends Controller
                     $saveActivity = $activity->createUserActivityUnsub($request->iduser, $subdate, $request->idadvertise, $new->idsubscription);
 
                     return response()->json([
-                        "message" => "unsubscribe!"
+                        'message'   =>  '',
+                        'result'    =>  true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "failed to unsubscribe!"
+                        'message'   => 'failed to unsubscribe!',
+                        'result'    =>  false
                     ]);
                 }
             }            
         } else {
             return response()->json([
-                "message" => "object not found!"
+                'message'   => 'object not found!',
+                'result'    =>  false
             ]);
         }
     }

@@ -225,4 +225,34 @@ class LikeController extends Controller
             return 'no interaction';
         }
     }
+
+    public function isLike($iduser, $idcontent){
+        $look  = DB::table('likes')
+                    ->select('likes.islike')
+                    ->where('likes.iduser', $iduser)
+                    ->where('likes.idcontent', $idcontent)
+                    ->where('likes.islike', 1)
+                    ->get();
+
+        if($look->count() > 0){            
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function isDislike($iduser, $idcontent){
+        $look  = DB::table('likes')
+                    ->select('likes.islike')
+                    ->where('likes.iduser', $iduser)
+                    ->where('likes.idcontent', $idcontent)
+                    ->where('likes.islike', 0)
+                    ->get();
+
+        if($look->count() > 0){            
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

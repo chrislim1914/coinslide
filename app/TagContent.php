@@ -16,7 +16,7 @@ class TagContent extends Model
      * @var array
      */
     protected $fillable = [
-        'idtag', 'content_tag_name', 
+        'idtag', 'contant_tag_name', 
     ];
 
 }

@@ -24,9 +24,9 @@ class TagController extends Controller
 
         foreach($taglist as $list){
             $TagContent = new TagContent();
-            $TagContent->contant_tag_name = $list;
+            $TagContent->content_tag_name = $list;
             $TagContent->save();
-            $TagContentlist[] = [$TagContent->contant_tag_name]; 
+            $TagContentlist[] = [$TagContent->content_tag_name]; 
         }
         return $TagContentlist;
     }

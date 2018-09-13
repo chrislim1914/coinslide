@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\UtilityController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\RedisController;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\JWT;
 
 class ContentController extends Controller
 {
@@ -25,6 +27,47 @@ class ContentController extends Controller
      */
     public function createTemporaryContent(Request $request){
 
+
+        if($request->file('image')==null){
+
+            $Contents = new Content();
+            $Contents->iduser = $request->iduser;
+            $Contents->title = $request->title;
+            $Contents->content = htmlspecialchars($request->content, ENT_QUOTES);
+            $Contents->description = $request->description;
+    
+            if($Contents->save()) {
+                /**
+                 * instantiate TagController and save on tag table
+                 * then get id everytime its save on $taglist
+                 */
+                $tagCont = new TagController();
+                $taglist = $tagCont->createContentTag($request->tag);
+                $idcontent = $Contents->id;
+    
+                /**
+                 * loop thru $taglist
+                 * then instantiate RedisController
+                 * hset everything on $taglist
+                 */
+                for ($i = 0; $i < count($taglist); $i++) {
+                    
+                    $redis = new RedisController();
+                    $redis->contentTag($taglist[$i][0], $idcontent);
+                }
+    
+                return response()->json([
+                    "message" => "",
+                    "result"  => true
+                ]);
+            } else {
+                return response()->json([
+                    "message" => "Failed to create new Content.",
+                    "result"  => false
+                ]);
+            }
+
+        }
         //get the image file
         $photo = $request->file('image');
 
@@ -69,11 +112,13 @@ class ContentController extends Controller
             }
 
             return response()->json([
-                "message" => "Contents Saved."
+                "message" => "",
+                "result"  => true
             ]);
         } else {
             return response()->json([
-                "message" => "Failed to create new Content."
+                "message" => "Failed to create new Content.",
+                "result"  => false
             ]);
         }
     }
@@ -126,16 +171,19 @@ class ContentController extends Controller
                         $redis->contentTag($taglist[$i][0], $idcontent);
                     }
                     return response()->json([
-                        "message" => "Content is now publish."
+                        "message" => "",
+                        "result"  => true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "there is nothing to update."
+                        "message" => "there is nothing to update.",
+                        "result"  => false
                     ]);
                 }
         } else {
             return response()->json([
-                "message" => "No list content are found."
+                "message" => "No list content are found.",
+                "result"  => false
             ]);
         }
     }
@@ -148,6 +196,50 @@ class ContentController extends Controller
      * @return response
      */
     public function createContent(Request $request){
+
+        $utility = new UtilityController();
+        $create_at = $utility->setDatetime();
+
+        if($request->file('image')==null){
+
+            $Contents = new Content();
+            $Contents->iduser = $request->iduser;
+            $Contents->title = $request->title;
+            $Contents->content = htmlspecialchars($request->content, ENT_QUOTES);
+            $Contents->description = $request->description;
+            $Contents->createdate = $create_at;
+    
+            if($Contents->save()) {
+                /**
+                 * instantiate TagController and save on tag table
+                 * then get id everytime its save on $taglist
+                 */
+                $tagCont = new TagController();
+                $taglist = $tagCont->createContentTag($request->tag);
+                $idcontent = $Contents->id;
+    
+                /**
+                 * loop thru $taglist
+                 * then instantiate RedisController
+                 * hset everything on $taglist
+                 */
+                for ($i = 0; $i < count($taglist); $i++) {
+                    
+                    $redis = new RedisController();
+                    $redis->contentTag($taglist[$i][0], $idcontent);
+                }
+    
+                return response()->json([
+                    "message" => "",
+                    "result"  => true
+                ]);
+            } else {
+                return response()->json([
+                    "message" => "Failed to create new Content.",
+                    "result"  => false
+                ]);
+            }
+        }
 
         //get the image file
         $photo = $request->file('image');
@@ -174,7 +266,6 @@ class ContentController extends Controller
         $Contents->createdate = $create_at;
 
         if($Contents->save()) {
-
             /**
              * instantiate TagController and save on tag table
              * then get id everytime its save on $taglist
@@ -195,11 +286,13 @@ class ContentController extends Controller
             }
 
             return response()->json([
-                "message" => "New Contents Created."
+                "message" => "",
+                "result"  => true
             ]);
         } else {
             return response()->json([
-                "message" => "Failed to create new Content."
+                "message" => "Failed to create new Content.",
+                "result"  => false
             ]);
         }
     }
@@ -213,15 +306,36 @@ class ContentController extends Controller
      */
     public function updateContent(Request $request, $idcontent){
 
+        if($request->file('image')<>null){
+            //get the image file
+            $photo = $request->file('image');
+            $utility = new UtilityController();
+            $newImage = $utility->contentResize($photo);
+
+            //set new name for image to save on database
+            $image = 'assets/content/'.time().'.'.$photo->getClientOriginalExtension(); 
+
+            //set directory to save the file
+            $destinationPath = $utility->public_path('/');           
+        }
+
+
         //find content info
         $Contents = Content::where('idcontent', $idcontent)
                             ->where('delete', 0)
                             ->get();
 
+        foreach($Contents as $newContents){
+            $image = $newContents->content_img;
+        }
+
+
+
         if($Contents->count() > 0 ) {
 
             $utility = new UtilityController();
             $modifieddate = $utility->setDatetime();
+
 
             //update content
             $updateContents = Content::where('idcontent', $idcontent);
@@ -229,8 +343,11 @@ class ContentController extends Controller
                                     'title'         => $request->title,
                                     'content'       => $request->content,
                                     'description'   => $request->description,
+                                    'content_img'   => $image,
                                     'modifieddate'   => $modifieddate
                                     ])) {
+                     //save to image to public/assets/banner folder
+                    $newImage->save($destinationPath.'/'.$image,80);
                     
                     /**
                      * instantiate TagController and save on tag table
@@ -238,7 +355,6 @@ class ContentController extends Controller
                      */
                     $tagCont = new TagController();
                     $taglist = $tagCont->createContentTag($request->tag);
-                    $idcontent = $Contents->id;
 
                     $redis = new RedisController();
                     $delTag = $redis->deleteContentTag($idcontent);
@@ -252,16 +368,19 @@ class ContentController extends Controller
                         $redis->contentTag($taglist[$i][0], $idcontent);
                     }
                     return response()->json([
-                        "message" => "Content Info Updated."
+                        "message" => "",
+                        "result"  => true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "content save failed."
+                        "message" => "content save failed.",
+                        "result"  => false
                     ]);
                 }
         } else {
             return response()->json([
-                "message" => "Content not found."
+                "message" => "Content not found.",
+                "result"  => false
             ]);
         }        
     }
@@ -273,7 +392,10 @@ class ContentController extends Controller
      * 
      * @return response
      */
-    public function contentReadOne($idcontent){
+    public function contentReadOne(Request $request, $idcontent){        
+
+        $currentiduser = $this->getHeaderToken($request->header('Authorization'));
+
 
         //create query contents inner joint users
         $content = DB::table('contents')
@@ -294,7 +416,8 @@ class ContentController extends Controller
          */
         $current = new UtilityController();
 
-        if($cursor->count() > 0 ) {                   
+        if($cursor->count() > 0 ) {
+            
             foreach($cursor as $new) {
                 $iduser = $new->iduser;
 
@@ -311,17 +434,20 @@ class ContentController extends Controller
                 $redistag = new RedisController();
                 $tag = $redistag->loadContentTag($idcontent);
 
+                $comment = new CommentController();
+                $countComment = $comment->countCommentforContentList($idcontent);
+
                 $content = [
                     'idcontent' => $new->idcontent,
                     'iduser' => $new->iduser,
-                    'photo' => $photo,
+                    'content_img' => $photo,
                     'nickname' => $new->nickname,
                     'title' => $new->title,
                     'content' => $new->content,
                     'description' => $new->description,
                     'createdate' => $new->createdate,
                     'modifieddate' => $new->modifieddate,
-                    'timelapse' => $current->timeLapse($new->createdate)
+                    'timelapse' => $current->timeLapse($new->createdate),                    
                 ];                           
             }
 
@@ -335,13 +461,26 @@ class ContentController extends Controller
             $like = new LikeController();
             $countlike = $like->countLike($idcontent);
             $countdislike = $like->countDislike($idcontent);
+            $count = $redistag->contentViewCount($idcontent);
+            $islike = $like->isLike($currentiduser, $idcontent);
+            $isdislike = $like->isDislike($currentiduser, $idcontent);
+            if($islike){
+                $activity = 'liked';
+            }elseif($isdislike){
+                $activity = 'disliked';
+            }else{
+                $activity = null;
+            }
 
             //append all the data needed to display for content
             $contentData = [
-                'content'   => $content,
-                'like'      => $countlike,
-                'dislike'   => $countdislike,
-                'tag'       => $tag
+                'content'       => $content,
+                'like'          => $countlike,
+                'dislike'       => $countdislike,
+                'tag'           => $tag,
+                'commentCount'  => $countComment,
+                'viewcount'     => $count,
+                'useractivity'  => $activity
             ];
             return response()->json($contentData);    
         } else {
@@ -357,7 +496,9 @@ class ContentController extends Controller
      * 
      * @return Responce
      */
-    public function newContent(){
+    public function newContent(Request $request){
+
+        $currentiduser = $this->getHeaderToken($request->header('Authorization'));
 
         $current = new UtilityController();       
 
@@ -409,6 +550,16 @@ class ContentController extends Controller
                  */
                 $like = new LikeController();
                 $countlike = $like->countLike($idcontent);
+                $islike = $like->isLike($currentiduser, $idcontent);
+                $isdislike = $like->isDislike($currentiduser, $idcontent);
+
+                if($islike){
+                    $activity = 'liked';
+                }elseif($isdislike){
+                    $activity = 'disliked';
+                }else{
+                    $activity = null;
+                }
 
                 $comment = new CommentController();
                 $countComment = $comment->countCommentforContentList($idcontent);
@@ -418,6 +569,7 @@ class ContentController extends Controller
 
                 $redistag = new RedisController();
                 $tag = $redistag->loadContentTag($idcontent);
+                $count = $redistag->contentViewCount($idcontent);
 
                 //now we put all in an array and return
                 $array[] = [
@@ -434,7 +586,9 @@ class ContentController extends Controller
                     'timelapse'     => $timelapse,
                     'like'          => $countlike,
                     'comment'       => $countComment,
-                    'tag'           => $tag
+                    'viewcount'     => $count,
+                    'tag'           => $tag,
+                    'useractivity'  => $activity
                 ];
 
             }
@@ -457,7 +611,9 @@ class ContentController extends Controller
      * 
      * @return response
      */
-    public function hotContent(){
+    public function hotContent(Request $request){
+
+        $currentiduser = $this->getHeaderToken($request->header('Authorization'));
 
         $current = new UtilityController();       
 
@@ -512,6 +668,8 @@ class ContentController extends Controller
                 $like = new LikeController();
                 $countlike = $like->countLike($idcontent);
                 $countdislike = $like->countDislike($idcontent);
+                $islike = $like->isLike($currentiduser, $idcontent);
+                $isdislike = $like->isDislike($currentiduser, $idcontent);
 
                 $comment = new CommentController();
                 $countComment = $comment->countCommentforContentList($idcontent);
@@ -527,6 +685,7 @@ class ContentController extends Controller
 
                 $redistag = new RedisController();
                 $tag = $redistag->loadContentTag($idcontent);
+                $count = $redistag->contentViewCount($idcontent);
 
                 
                 if($hot){
@@ -546,7 +705,9 @@ class ContentController extends Controller
                         'dislike'       => $countdislike,
                         'comment'       => $countComment,
                         'points'        => $points,
-                        'tag'       => $tag
+                        'viewcount'     => $count,
+                        'tag'           => $tag,
+                        'useractivity'  => $activity
                     ];
                 } else {
                     return response()->json([
@@ -572,7 +733,9 @@ class ContentController extends Controller
      * 
      * @return response
      */
-    public function trendingContent(){
+    public function trendingContent(Request $request){
+
+        $currentiduser = $this->getHeaderToken($request->header('Authorization'));
 
         $current = new UtilityController();       
 
@@ -627,6 +790,8 @@ class ContentController extends Controller
                 $like = new LikeController();
                 $countlike = $like->countLike($idcontent);
                 $countdislike = $like->countDislike($idcontent);
+                $islike = $like->isLike($currentiduser, $idcontent);
+                $isdislike = $like->isDislike($currentiduser, $idcontent);
 
                 $comment = new CommentController();
                 $countComment = $comment->countCommentforContentList($idcontent);
@@ -642,6 +807,7 @@ class ContentController extends Controller
 
                 $redistag = new RedisController();
                 $tag = $redistag->loadContentTag($idcontent);
+                $count = $redistag->contentViewCount($idcontent);
                 
                 if($trending){
                     $array[] = [
@@ -660,7 +826,9 @@ class ContentController extends Controller
                         'dislike'       => $countdislike,
                         'comment'       => $countComment,
                         'points'        => $points,
-                        'tag'       => $tag
+                        'viewcount'     => $count,
+                        'tag'           => $tag,
+                        'useractivity'  => $activity
                     ];
                 } else {
                     return response()->json([
@@ -674,5 +842,59 @@ class ContentController extends Controller
                 "message" => "No Content are found."
             ]);
         }
+    }
+
+    public function deleteContent($idcontent){
+
+        //check first if exist
+        $check = Content::where('idcontent', $idcontent)->get();
+
+        if($check->count() > 0){
+
+            $delete = Content::where('idcontent', $idcontent);
+            if($delete->update([
+                'delete'    => 1
+            ])){
+                return response()->json([
+                    'message'  =>  '',
+                    'result'  =>  true
+                ]);
+            }else{
+                return response()->json([
+                    'message'  =>  'Failed to delete content',
+                    'result'  =>  false
+                ]);
+            }   
+        }else{
+            return response()->json([
+                'message'  =>  'content not found!',
+                'result'  =>  false
+            ]);
+        }
+    }
+
+    public function getHeaderToken($token){
+
+        $header = substr($token, 7);   
+
+        try {
+
+            $token = JWTAuth::setToken((string)$header);
+
+        } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+
+            return response()->json([
+                'message'   => 'token_invalid',
+                'result'    => false
+                ]);
+
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {            
+            return response()->json([
+                'message'   => $e->getMessage(),
+                'result'    => false
+                ]);
+        }
+
+        return $currentiduser = $token->getPayload()->get('sub');
     }
 }

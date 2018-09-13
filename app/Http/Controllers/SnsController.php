@@ -54,7 +54,8 @@ class SnsController extends Controller
 
         if($users->count() > 0){
             return response()->json([
-                "message" => "redirect to login modal"
+                "message" => "redirect to login modal",
+                'result'    =>  true
             ]);
         } 
 
@@ -66,9 +67,15 @@ class SnsController extends Controller
             'snsProviderName'   => 'Google +',
             'snsProviderId'     => $user->getId(),
             'profilephoto'      => $photo,
+            'token'             => $token,
+            'refreshToken'      => $refreshToken,
+            'expiresIn'         => $expiresIn,
         ];
 
-        return response()->json($UserData);
+        return response()->json([
+            'data'      => $UserData,
+            'result'    =>  true
+        ]);
     }
 
     /**
@@ -93,7 +100,7 @@ class SnsController extends Controller
      */
     public function googleCallbackMobile(){
 
-        $user = Socialite::driver('google')->user(); 
+        $user = Socialite::driver('google')->stateless()->user(); 
 
         $token = $user->token;
         $refreshToken = $user->refreshToken; 
@@ -109,11 +116,13 @@ class SnsController extends Controller
         $photo = $newsize;
 
         $users = User::where('email', $user->getEmail())
+                        ->where('snsProviderName', $user->getId())
                         ->get();
 
         if($users->count() > 0){
             return response()->json([
-                "message" => "redirect to login modal"
+                "message" => "redirect to login modal",
+                'result'    =>  true
             ]);
         } 
 
@@ -130,7 +139,10 @@ class SnsController extends Controller
             'expiresIn'         => $expiresIn,
         ];
 
-        return response()->json($UserData);
+        return response()->json([
+            'data'      => $UserData,
+            'result'    =>  true
+        ]);
     }
     
     public function redirectToFacebook(LaravelFacebookSdk $fb){

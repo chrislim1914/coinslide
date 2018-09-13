@@ -12,7 +12,8 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+	// return $router->app->version();
+	return view('sample');
 });
 
 /**
@@ -60,8 +61,7 @@ $router->group(['prefix' => '/'], function($router){
 	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallback']);
 
 	//google mobile app
-    $router->get('googleMobile', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogleMobile']);		
-	$router->get('googleMobile/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallbackMobile']);
+    $router->post('googleMobile', ['middleware' => 'cors', 'uses' => 'UserController@findGoogleProvider']);
 
 	//facebook web app
     // $router->get('facebook', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToFacebook']);		
@@ -139,7 +139,7 @@ $router->group(['prefix' => '/'], function($router){
 		// Auth::login($user);
 
 		return response()->json(
-			['token'	=> $token]
+			['token'	=> $facebook_user]
 		);
 	});
 
@@ -162,6 +162,7 @@ $router->group(['prefix' => 'api/'], function($router)
 	$router->post('Content/createTemporary', ['middleware' => 'cors', 'uses' => 'ContentController@createTemporaryContent']);	
 	$router->get('Content/saveTempContent/{iduser}', ['middleware' => 'cors', 'uses' => 'ContentController@saveTempContent']);
 	$router->post('Content/{idcontent}/Update', ['middleware' => 'cors', 'uses' => 'ContentController@updateContent']);
+	$router->get('Content/{idcontent}/Delete', ['middleware' => 'cors', 'uses' => 'ContentController@deleteContent']);
 
 	//like routes
 	$router->post('Content/like/', ['middleware' => 'cors', 'uses' => 'LikeController@like']);
@@ -171,7 +172,7 @@ $router->group(['prefix' => 'api/'], function($router)
 
 	//comment routes
 	$router->post('Comment/post/', ['middleware' => 'cors', 'uses' => 'CommentController@postComment']);
-	$router->post('Comment/delete/', ['middleware' => 'cors', 'uses' => 'CommentController@deleteComment']);
+	$router->post('Comment/delete/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@deleteComment']);
 	$router->get('Comment/count/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@countComment']);
 	$router->get('Comment/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@loadComment']);
 

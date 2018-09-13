@@ -97,10 +97,14 @@ class AdvertiseController extends Controller {
                 ];
             }
 
-            return response()->json($array);
+            return response()->json([
+                'data'      =>  $array,
+                'result'    =>  true 
+                ]);
         } else {
             return response()-json([
-                'message' => 'no Ads found.'
+                'message'   => 'no Ads found.',
+                'result'    =>  false
             ]);
         }
     }
@@ -191,10 +195,14 @@ class AdvertiseController extends Controller {
                     'tag'           => $tag
                 ];
             }
-            return response()->json($array);
+            return response()->json([
+                'data'      =>  $array,
+                'result'    =>  true 
+            ]);
         } else {
             return response()->json([
-                'message' => 'no Ads found.'
+                'message' => 'no Ads found.',
+                'result'    =>  false
             ]);
         }
 
@@ -222,10 +230,14 @@ class AdvertiseController extends Controller {
                     ->get();
         
         if($ads->count() > 0){
-            return response()->json($ads);
+            return response()->json([
+                'data'      =>  $ads,
+                'result'    =>  true 
+            ]);
         } else {
             return response()->json([
-                'mesaage' => 'You dont have subscription yet'
+                'mesaage' => 'You dont have subscription yet',
+                'result'    =>  false
             ]);
         }
     }    
@@ -267,13 +279,15 @@ class AdvertiseController extends Controller {
                 $redis->adsTag($taglist[$i][0], $idads);
             }
 
-            echo json_encode(
-                array("message" => "New Ads Created.")
-            );
-        } else {
-            echo json_encode(
-                array("message" => "Ads not created.")
-            );
+            return response()->json([
+                'mesaage'   => '',
+                'result'    =>  true
+            ]);
+        } else {            
+            return response()->json([
+                'mesaage'   => 'Ads not created.',
+                'result'    =>  false
+            ]);
         }
     }
 
@@ -320,18 +334,21 @@ class AdvertiseController extends Controller {
                     for ($i = 0; $i < count($taglist); $i++) {   
                         $redis->adsTag($taglist[$i][0], $idads);
                     }
-                    echo json_encode(
-                        array("message" => "Ads Info Updated.")
-                    );
+                    return response()->json([
+                        'mesaage'   => '',
+                        'result'    =>  true
+                    ]);
                 } else {
-                    echo json_encode(
-                        array("message" => "there is nothing to update.")
-                    );
+                    return response()->json([
+                        'mesaage'   => 'there is nothing to update.',
+                        'result'    =>  false
+                    ]);
                 }
         } else {
-            echo json_encode(
-                array("message" => "Ads not found.")
-            );
+            return response()->json([
+                'mesaage'   => 'Ads not found.',
+                'result'    =>  false
+            ]);
         }
     }
 

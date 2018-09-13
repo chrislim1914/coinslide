@@ -22,7 +22,11 @@ return [
         'client_secret' => env('GOOGLE_SECRET'),
         'redirect' => 'https://api.coinslide.io/google/callback'
     ],
-
+    'googleMobile' => [
+        'client_id' => env('GOOGLE_CLIENTID'),
+        'client_secret' => env('GOOGLE_SECRET'),
+        'redirect' => 'https://api.coinslide.io/googleMobile/callback'
+    ],
     'facebook_config' => [
         'app_id' => env('FACEBOOK_APP_ID'),
         'app_secret' => env('FACEBOOK_APP_SECRET'),

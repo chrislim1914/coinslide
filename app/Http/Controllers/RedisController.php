@@ -11,6 +11,7 @@ class RedisController extends Controller {
     private $contentredis;
     private $adsredis;
     private $advertiserredis;
+    private $contentVCount;
     /**
      * load total reward
      * 
@@ -193,6 +194,24 @@ class RedisController extends Controller {
         ]);
 
         $this->advertiserredis->del($idcontent);
+    }
+    
+    /**
+     * method to count number of viewed
+     */
+    public function contentViewCount($idcontent){
+
+        $this->contentVCount = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 5,
+        ]);
+
+        $this->contentVCount->incr($idcontent);
+
+        return $this->contentVCount->get($idcontent);
     }
 }
 

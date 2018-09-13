@@ -288,10 +288,4 @@ class UtilityController extends Controller
         
         return $rediodArray;
     }
-
-    public function checkdateRange($date){
-        $date = $date->toDateString();
-
-        
-    }
 }

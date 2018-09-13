@@ -15,5 +15,8 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\ExampleEvent' => [
             'App\Listeners\ExampleListener',
         ],
+        \SocialiteProviders\Manager\SocialiteWasCalled::class => [
+            'SocialiteProviders\\Google\\GoogleExtendSocialite@handle',
+        ],
     ];
 }

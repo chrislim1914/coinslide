@@ -59,7 +59,15 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function me(){
-        return response()->json(Auth::user());
+        try{
+            return response()->json(Auth::user());
+        } catch (\Tymon\JWTAuth\Exceptions\JWTException $e)
+           {
+            return response()->json([
+                'message' => $e->getMessage(),
+                'result'    => false
+            ]);
+        }
     }
 
     /**
