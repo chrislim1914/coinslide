@@ -2,16 +2,10 @@
 
 namespace App;
 
-use Illuminate\Auth\Authenticatable;
-use Laravel\Lumen\Auth\Authorizable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
-class Advertiser extends Model implements AuthenticatableContract, AuthorizableContract
+class Advertiser extends Model
 {
-    use Authenticatable, Authorizable;
-
     public $timestamps = false;
 
     /**
@@ -23,5 +17,4 @@ class Advertiser extends Model implements AuthenticatableContract, AuthorizableC
         'idadvertiser', 'iduser', 'company_name', 'business_registration', 'business_category', 'representative_name', 
         'representative_contactno', 'company_website', 'email', 'password', 'delete'
     ];
-
 }

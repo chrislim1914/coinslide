@@ -20,13 +20,18 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENTID'),
         'client_secret' => env('GOOGLE_SECRET'),
-        'redirect' => 'http://localhost:8900/google/callback'
+        'redirect' => 'https://api.coinslide.io/google/callback'
     ],
-
+    'googleMobile' => [
+        'client_id' => env('GOOGLE_CLIENTID'),
+        'client_secret' => env('GOOGLE_SECRET'),
+        'redirect' => 'https://api.coinslide.io/googleMobile/callback'
+    ],
     'facebook_config' => [
         'app_id' => env('FACEBOOK_APP_ID'),
         'app_secret' => env('FACEBOOK_APP_SECRET'),
-        'default_graph_version' => 'v2.10'
+        'redirect' => 'https://api.coinslide.io/facebook/callback/',
+        'default_graph_version' => 'v3.0'
     ],
 
     /*

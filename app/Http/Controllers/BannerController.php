@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Banner;
-use App\Http\Controllers\ImageController;
-use App\Http\Controllers\PasswordEncrypt;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Carbon;
+use App\Http\Controllers\UtilityController;
 
 
-class BannerController extends Controller {
-
+class BannerController extends Controller
+{
     /**
      * method to retrieved all banner
      * 
@@ -21,7 +19,7 @@ class BannerController extends Controller {
     public function readAllBanners(){
                 
         $Banner  = Banner::orderBy('idbanner', 'desc')
-                        ->paginate(5);
+                        ->get();
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $Banner;
 
@@ -37,13 +35,13 @@ class BannerController extends Controller {
     /**
      * method to retrieved single banner
      * 
-     * @param $id
+     * @param $idbanner
      * @return Response
      */
-    public function readBanner($id){
+    public function readBanner($idbanner){
 
         //get Banner info
-        $Banner  = Banner::where('idbanner', $id)->get();
+        $Banner  = Banner::where('idbanner', $idbanner)->get();
 
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $Banner;
@@ -54,40 +52,6 @@ class BannerController extends Controller {
             echo json_encode(
                 array("message" => "Banner not found.")
             );
-        }
-    }
-
-    /**
-     * method to search banner table by title description
-     * with pagination
-     * 
-     * @return Request $request responce 
-     */
-    public function searchBanner(Request $request){
-
-        /**
-         * check if search string is null before we query
-         */
-        if($request->search == null) {
-            echo json_encode(
-                array("message" => "No Search String.")
-            );
-        } else {
-
-            $Banner = Banner::where('title', 'LIKE', "%$request->search%")
-                          ->orWhere('description', 'LIKE', "%$request->search%")
-                          ->paginate(5);
-
-            //the cursor method may be used to greatly reduce your memory usage:
-            $cursor = $Banner;
-
-            if($cursor->count() > 0 ) {
-                return response()->json($cursor);
-            } else {
-                echo json_encode(
-                    array("message" => "No Banner are found.")
-                );
-            }
         }
     }
 
@@ -114,20 +78,54 @@ class BannerController extends Controller {
                 array("message" => "No Banner are found.")
             );
         }
+    }
 
+    /**
+     * method to search banner table by title description
+     * with pagination
+     * 
+     * @return Request $request responce 
+     */
+    public function searchBanner(Request $request){
+
+        /**
+         * check if search string is null before we query
+         */
+        if($request->search == null) {
+            echo json_encode(
+                array("message" => "No Search String.")
+            );
+        } else {
+
+            $Banner = Banner::where('title', 'LIKE', "%$request->search%")
+                          ->orWhere('description', 'LIKE', "%$request->search%")
+                          ->get();
+
+            //the cursor method may be used to greatly reduce your memory usage:
+            $cursor = $Banner;
+
+            if($cursor->count() > 0 ) {
+                return response()->json($cursor);
+            } else {
+                echo json_encode(
+                    array("message" => "No Banner are found.")
+                );
+            }
+        }
     }
 
     /**
      * method to create banner
      * 
-     * @return Request $request responce 
+     * @return Request $request 
+     * @return responce 
      */
     public function createBanner(Request $request){
 
         $photo = $request->file('img');
 
         //instanciate ImageController for resize
-        $resize = new ImageController();
+        $resize = new UtilityController();
         $newImage = $resize->bannerResize($photo);
 
         //set new name for image to save on database
@@ -162,21 +160,37 @@ class BannerController extends Controller {
     /**
      * methos to update banner
      * 
-     * @return Request $request responce 
+     * @return Request $request 
+     * @return responce 
      */
-    public function updateBanner(Request $request, $id){
+    public function updateBanner(Request $request, $idbanner){
 
         //find banner info
-        $banner = Banner::where('idbanner', $id)
+        $banner = Banner::where('idbanner', $idbanner)
                         ->get();
 
         if($banner->count() > 0 ) {
             //udate banner
-            $updateBanner = Banner::where('idbanner', $id);
+            $photo = $request->file('img');
+
+            //instanciate ImageController for resize
+            $resize = new UtilityController();
+            $newImage = $resize->bannerResize($photo);
+
+            //set new name for image to save on database
+            $newBannerName = 'assets/banner/'.time().'.'.$photo->getClientOriginalExtension(); 
+
+            //set directory to save the file
+            $destinationPath = $resize->public_path('/');        
+        
+            //save to image to public/assets/banner folder
+            $newImage->save($destinationPath.'/'.$newBannerName,80);
+
+            $updateBanner = Banner::where('idbanner', $idbanner);
             if($updateBanner->update([
                                 'title'         => $request->title,
                                 'description'   => $request->description,
-                                'img'           => $request->img,
+                                'img'           => $newBannerName,
                                 'startdate'     => $request->startdate,
                                 'enddate'       => $request->enddate,
                                 'position'       => $request->position,

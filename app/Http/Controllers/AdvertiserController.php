@@ -2,127 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Advertise;
 use App\Advertiser;
+use App\AdvertiserBanner;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
-use App\Http\Controllers\PasswordEncrypt;
+use App\Http\Controllers\UtilityController;
+use App\Http\Controllers\RedisController;
 
-class AdvertiserController extends Controller {
+class AdvertiserController extends Controller
+{
 
     /**
-     * method to display list of advertiser
+     * method to load advertiser info, advertiser banner, and ads
+     * 
+     * @param $idadvertiser
      * 
      * @return response
      */
-    public function advertiserList(){
-        /**
-         * create union create to merge query without subscriber by using NOT IN condition and insert value of 0
-         * 
-         * the second query is to find unsubscribe count and subscribe count is equal then the subscription value = 0
-         * 
-         * the third query is advertiser with link on subscribe table and count the subscription but filter the enddate
-         * to avoid any miscount value base on second query
-         * 
-         */
-        $advertisers = DB::table('advertisers')
-                        ->select('advertisers.idadvertiser', 
-                                'advertisers.iduser', 
-                                'advertisers.company_name',
-                                'advertisers.business_registration', 
-                                'advertisers.business_category', 
-                                'advertisers.representative_name',
-                                'advertisers.representative_contactno', 
-                                'advertisers.company_website', 
-                                'advertisers.email',
-                                DB::raw("(0) as subscriber"))
-                                ->where('advertisers.delete', 0)
-                                ->whereNotIn('advertisers.idadvertiser', DB::table('subscriptions')
-                                                                        ->select('subscriptions.idadvertiser')
-                                );
-        $advertiserAllEnded = DB::table('advertisers')
-                                ->join('subscriptions', 'advertisers.idadvertiser', '=', 'subscriptions.idadvertiser')
-                                ->select('advertisers.idadvertiser', 
-                                        'advertisers.iduser', 
-                                        'advertisers.company_name',
-                                        'advertisers.business_registration', 
-                                        'advertisers.business_category', 
-                                        'advertisers.representative_name',
-                                        'advertisers.representative_contactno', 
-                                        'advertisers.company_website', 
-                                        'advertisers.email',
-                                        DB::raw("(0) as subscriber"))
-                                ->where('advertisers.delete', 0)
-                                ->groupBy('advertisers.idadvertiser')
-                                ->having(DB::raw("Count(subscriptions.startdate)"), '=', DB::raw("Count(subscriptions.enddate)"));
+    public function advertiserInfo($idadvertiser){
 
-        $advertiserswithSub = DB::table('advertisers')
-                        ->join('subscriptions', 'advertisers.idadvertiser', '=', 'subscriptions.idadvertiser')
-                        ->select('advertisers.idadvertiser', 
-                                'advertisers.iduser', 
-                                'advertisers.company_name',
-                                'advertisers.business_registration', 
-                                'advertisers.business_category', 
-                                'advertisers.representative_name',
-                                'advertisers.representative_contactno', 
-                                'advertisers.company_website', 
-                                'advertisers.email',
-                                DB::raw('count(subscriptions.idsubscription) as subscriber'))
-                        ->where('advertisers.delete', 0)
-                        ->whereNull('subscriptions.enddate')                        
-                        ->union($advertisers)
-                        ->union($advertiserAllEnded)
-                        ->groupBy('advertisers.idadvertiser')
-                        ->orderBy('subscriber', 'DESC')
-                        ->get();
-
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $advertiserswithSub;
-
-        if($cursor->count() > 0 ) {                
-            return response()->json($cursor);
-        } else {
-            return response()->json([
-                "message" => "No advertiser are found."
-            ]);
+        //load advertiser
+        $advertiser = Advertiser::where('idadvertiser', $idadvertiser)
+                                ->where('delete', 0)->get();
+        if($advertiser->count() <= 0){
+            $advertiser = ['message' => 'advertiser not found or account is deactivated'];
         }
-    }
 
-    /**
-     * method to read single advertiser
-     * 
-     * @param $id
-     * @return response
-     */
-    public function readAdvertiser($id){
-        //find Advertiser info
-        $advertiser = Advertiser::where('idadvertiser', $id)
-                                ->where('delete', 0)
-                                ->get();
-
-        //the cursor method may be used to greatly reduce your memory usage:
-        $cursor = $advertiser;
-
-        if($cursor->count() > 0 ) {                   
-            foreach($cursor as $new) {
-                return response()->json([
-                    'idadvertiser' => $new->idadvertiser,
-                    'iduser' => $new->iduser,
-                    'company_name' => $new->company_name,
-                    'business_registration' => $new->business_registration,
-                    'business_category' => $new->business_category,
-                    'representative_name' => $new->representative_name,
-                    'representative_contactno' => $new->representative_contactno,
-                    'company_website' => $new->company_website,
-                    'email' => $new->email,
-                ]);                
-            }
-        } else {
-            return response()->json([
-                "message" => "No advertiser are found."
-            ]);
+        //load advertiser banner
+        $banner = AdvertiserBanner::where('idadvertiser', $idadvertiser)->get();
+        if($banner->count() <= 0){
+            $banner = ['message' => 'advertiser dont have banner'];
         }
+
+        //load advertiser ads
+        $ads = Advertise::where('idadvertisers', $idadvertiser)->orderBy('idadvertise', 'desc')->get();
+        if($ads->count() <= 0){
+            $ads = ['message' => 'advertiser dont have advertisement yet!'];
+        }
+
+        //load advertiser tags
+        $tag = new RedisController();
+        $advertisertag = $tag->loadAdvertiserTag($idadvertiser);
+
+        //load all in an array
+        $arrayData[] = [
+            'advertiser' => $advertiser,
+            'banner'     => $banner,
+            'ads'        => $ads,
+            'tag'        => $advertisertag
+        ];
+
+        return response()->json($arrayData);
     }
 
     /**
@@ -153,21 +86,43 @@ class AdvertiserController extends Controller {
          */
 
         if($advertiser->save()) {
-            echo json_encode(
-                array("message" => "Email has been sent.")
-            );
-        } else {
-            echo json_encode(
-                array("message" => "Error encountered.")
-            );
-        }
 
+             /**
+             * instantiate TagController and save on tag table
+             * then get id everytime its save on $taglist
+             */
+            $tagCont = new TagController();
+            $taglist = $tagCont->createAdvertiserTag($request->tag);
+            $idads = $advertiser->id;
+
+            /**
+             * loop thru $taglist
+             * then instantiate RedisController
+             * hset everything on $taglist
+             */
+            for ($i = 0; $i < count($taglist); $i++) {
+                
+                $redis = new RedisController();
+                $redis->advertiserTag($taglist[$i][0], $idads);
+            }
+             //send mail here
+                // $verificationCode = base64_encode(str_random(12));
+                // $send = new SendMail();
+                // $sendit = $send->sendMail($request->email,$verificationCode);
+            return response()->json([
+                'message'   => 'Email has been sent.'
+            ]);
+        } else {
+            return response()->json([
+                'message'   => 'failed to create user.'
+            ]);
+        }
     }
 
     /**
      * method to save the newly registered advertiser password
      * 
-     * @param $id
+     * @param Request $request, $id
      * 
      * @return response
      */
@@ -177,7 +132,7 @@ class AdvertiserController extends Controller {
         $advertiser = Advertiser::where('idadvertiser', $id)->get();
 
         if($advertiser->count() > 0){
-            $hash = new PasswordEncrypt();
+            $hash = new UtilityController();
             $insertPass = Advertiser::where('idadvertiser', $id);
             if($insertPass->update([
                 'password' => $hash->hash($request->password)//password hash
@@ -188,44 +143,6 @@ class AdvertiserController extends Controller {
             } else {
                 echo json_encode(
                     array("message" => "Failed to set password.")
-                );
-            }
-        } else {
-            echo json_encode(
-                array("message" => "advertiser not found.")
-            );
-        }
-
-    }
-
-    /**
-     * method to update advertiser info
-     * 
-     * @param $id
-     * 
-     * @return response
-     */
-    public function updateAdvertiser(Request $request, $id){
-
-        //first retrieved the advertiser
-        $advertiser = Advertiser::where('idadvertiser', $id)->get();
-
-        if($advertiser->count() > 0){
-            $insertPass = Advertiser::where('idadvertiser', $id);
-            if($insertPass->update([
-                'company_name'              => $request->company_name,
-                'business_registration'     => $request->business_registration,
-                'business_category'         => $request->business_category,
-                'representative_name'       => $request->representative_name,
-                'representative_contactno'  => $request->representative_contactno,
-                'company_website'           => $request->company_website,
-            ])){
-                echo json_encode(
-                    array("message" => "Advertiser info Updated.")
-                );
-            } else {
-                echo json_encode(
-                    array("message" => "There is nothing to update.")
                 );
             }
         } else {

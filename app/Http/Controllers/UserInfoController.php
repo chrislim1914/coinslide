@@ -3,36 +3,47 @@
 namespace App\Http\Controllers;
 
 use App\UserInfo;
-use App\User;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Http\Controllers\ImageController;
 use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\DateTimeController;
+use Illuminate\Http\Request;
+use App\Http\Controllers\UtilityController;
 
-class UserinfoController extends Controller {
-
+class UserInfoController extends Controller
+{
     /**
-     * method to retrieved all userinformations collection data
+     * method to update userinformations collections
+     * to be utilized under UserController to update Client info
      * 
-     * @return response
+     * @param $iduser Array $userdata
+     * 
+     * @return Bool 
      */
-    public function all(){
-        $userinfo = UserInfo::all();
+    public function updateUserInfo($iduser, Array $userdata){
+        
+        $iduser = intval($iduser);
+        
+        //update userinformation with parameter
+        $saveUser = DB::connection('mongodb')->collection('userinformations')
+                    ->where('iduser', '=', $iduser);
 
-        return response()->json($userinfo);
+        //execute update
+        if($saveUser->update([
+                    'gender'       => $userdata['gender'],
+                    'birth'        => $userdata['birth'],
+                    'country'      => $userdata['country'],
+                    'city'         => $userdata['city'],
+                    'mStatus'      => $userdata['mStatus']
+                ])) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
-    /**
-     * method to update Userinformations collection
-     * 
-     * @param Request $request $id
-     * 
-     * @return response
-     */
-    public function updateUserInfo(Request $request){        
-        
-        $iduser = intval($request->iduser);
+    public function updateProfilePhoto(Request $request, $iduser){
+
+        $iduser = intval($iduser);
+
         //check first if user exist
         $userinfo = UserInfo::where('iduser', $iduser)
                             ->get();
@@ -42,7 +53,7 @@ class UserinfoController extends Controller {
             $photo = $request->file('image');
 
             //instanciate ImageController for resize
-            $resize = new ImageController();
+            $resize = new UtilityController();
             $newImage = $resize->profilephotoResize($photo);
 
             //set new name for image to save on database
@@ -60,59 +71,43 @@ class UserinfoController extends Controller {
 
             //execute update
             if($saveUser->update([
-                            'gender'       => $request->gender,
                             'profilephoto' => $newName,
-                            'birth'        => $request->birth,
-                            'city'         => $request->city,
-                            'mStatus'      => $request->mStatus
                         ])) {
                 return response()->json([
-                    "message" => "User information saved!"
-                ]);
-            } else {
-                return response()->json([
-                    "message" => "failed to save user information!"
+                    "message" => "Profile photo updated"
                 ]);
             }
         } else {
             return response()->json([
-                "message" => "User Information not found."
+                "message" => "client not found."
             ]);
         }
     }
 
-    public function forAge(){
-        $current = new DateTimeController();
-        $userinfo = UserInfo::all();
+    /**
+     * method to retrieved user profile photo
+     * 
+     * @param $iduser
+     * 
+     * @return $userinfo
+     */
+    public function getUserPhoto($iduser){
+        //convert the $id to integer
+        $iduser = intval($iduser);
 
-        $cursor = $userinfo;
-        if($cursor->count() > 0 ) {    
-            foreach($cursor as $new){
-                $_id              = $new->_id;
-                $iduser           = $new->iduser;
-                $gender           = $new->gender;
-                $profilephoto     = $new->profilephoto;
-                $birth            = $new->birth;
-                $city             = $new->city;
-                $mStatus          = $new->gender;
-
-                $array[] = [
-                    '_id'     => $_id,
-                    'iduser'     => $iduser,
-                    'gender'     => $gender,
-                    'profilephoto'     => $profilephoto,
-                    'birth'     => $birth,
-                    'age'       => $current->findAge($birth),
-                    'city'     => $city,
-                    'mStatus'     => $mStatus,
-                ];
+        $userinfo = DB::connection('mongodb')->collection('userinformations')
+                        ->project(['_id' => 0])
+                        ->select('profilephoto')
+                        ->where('iduser', '=', $iduser)
+                        ->get();
+        if($userinfo) {
+            foreach($userinfo as $new){
+                return $new;
             }
             
-            return response()->json($array);
         } else {
-            echo json_encode(
-                array("message" => "No Content are found.")
-            );
+            return 'no photo';
         }
+        
     }
 }

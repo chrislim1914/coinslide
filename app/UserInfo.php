@@ -2,11 +2,7 @@
 
 namespace App;
 
-use Illuminate\Auth\Authenticatable;
-use Laravel\Lumen\Auth\Authorizable;
 use Jenssegers\Mongodb\Eloquent\Model as Eloquent;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
 
 class UserInfo extends Eloquent
 {   
@@ -16,6 +12,7 @@ class UserInfo extends Eloquent
     protected $connection = 'mongodb';
 
     protected $collection = "userinformations";
+    
 
     /**
      * The attributes that are mass assignable.
@@ -23,15 +20,6 @@ class UserInfo extends Eloquent
      * @var array
      */
     protected $fillable = [
-        '_id', 'iduser', 'gender', 'profilephoto', 'birth', 'city', 'mStatus',
-    ];
-
-    /**
-     * The attributes excluded from the model's JSON form.
-     *
-     * @var array
-     */
-    protected $hidden = [
-        'password',
-    ];
+        '_id', 'iduser', 'gender', 'profilephoto', 'birth', 'country', 'city', 'mStatus',
+    ];    
 }

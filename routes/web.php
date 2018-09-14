@@ -12,7 +12,8 @@
 */
 
 $router->get('/', function () use ($router) {
-	return $router->app->version();
+	// return $router->app->version();
+	return view('sample');
 });
 
 /**
@@ -22,190 +23,68 @@ $router->get('/', function () use ($router) {
  */
 $router->group(['prefix' => 'api/'], function($router)
 {
-	$router->get('login/', ['middleware' => 'cors', 'uses' => 'UserController@authenticate']);
-	$router->get('User/', ['middleware' => 'cors', 'uses' => 'UserController@readUsers']);
-	$router->post('User/create/', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
-	$router->get('User/{id}', ['middleware' => 'cors', 'uses' => 'UserController@getUser']);	
-	$router->post('User/update/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updateUser']);
-	$router->post('User/updateUserInfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@updateUserInfo']);
-	$router->post('User/updatePassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
-	$router->post('User/Search/', ['middleware' => 'cors', 'uses' => 'UserController@searchUser']);
-	$router->post('User/delete/{id}', ['middleware' => 'cors', 'uses' => 'UserController@deleteUser']);	
-	$router->post('User/setPassword/{id}', ['middleware' => 'cors', 'uses' => 'UserController@savePassword']);	
-});
-
-/**
- * API Route for Banner
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Banner/', ['middleware' => 'cors', 'uses' => 'BannerController@readAllBanners']);
-	$router->get('Banner/read/{id}', ['middleware' => 'cors', 'uses' => 'BannerController@readBanner']);
-	$router->get('Banner/active/', ['middleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
-	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);	
-	$router->post('Banner/create/', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
-	$router->post('Banner/update/{id}', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
-});
-
-/**
- * API Route for Content
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Content/', ['middleware' => 'cors', 'uses' => 'ContentController@readAllContent']);
-	$router->get('Content/Best/', ['middleware' => 'cors', 'uses' => 'ContentController@bestContent']);
-	$router->get('Content/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@contentReadOne']);
-	$router->post('Content/Search', ['middleware' => 'cors', 'uses' => 'ContentController@searchContent']);
-	$router->post('Content/create', ['middleware' => 'cors', 'uses' => 'ContentController@createContent']);
-	$router->post('Content/update/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@updateContent']);
-	$router->post('Content/delete/{id}', ['middleware' => 'cors', 'uses' => 'ContentController@deleteContent']);
-});
-
-/**
- * API Route for Likes
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->post('like/', ['middleware' => 'cors', 'uses' => 'LikeController@like']);
-	$router->post('dislike/', ['middleware' => 'cors', 'uses' => 'LikeController@dislike']);
-	$router->get('contentLike/{id}', ['middleware' => 'cors', 'uses' => 'LikeController@contentLike']);
-	$router->get('contentDislike/{id}', ['middleware' => 'cors', 'uses' => 'LikeController@contentDislike']);
-});
-
-/**
- * API Route for Advertise
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Ads/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@adsList']);
-	$router->get('Ads/Best/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@bestAds']);
-	$router->get('Ads/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
-	$router->post('Ads/create/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@createAds']);
-	$router->post('Ads/update/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiseController@updateAds']);
-});
-
-/**
- * API Route for Advertiser
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Advertiser/', ['middleware' => 'cors', 'uses' => 'AdvertiserController@advertiserList']);
-	$router->get('Advertiser/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@readAdvertiser']);
-	$router->post('Advertiser/create/', ['middleware' => 'cors', 'uses' => 'AdvertiserController@createAdvertiser']);
-	$router->post('Advertiser/insertPassword/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@insertPassword']);
-	$router->post('Advertiser/update/{id}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@updateAdvertiser']);
-	//Ads list of Advertiser
-	$router->get('Advertiser/{id}/Adslist/', ['middleware' => 'cors', 'uses' => 'AdvertiseController@adsListbyAdvertiser']);
-	//Banner list of Advertiser
-	$router->get('Advertiser/{id}/Banner/', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@bannerListbyAdvertiser']);
+	//login
+	$router->post('login', ['middleware' => 'cors', 'uses' => 'AuthController@login']);
+	//logout
+	$router->post('logout', ['middleware' => ['cors','auth'], 'uses' => 'AuthController@logout']);
+	//refresh token
+	$router->post('refreshToken', ['middleware' => 'cors', 'uses' => 'AuthController@refresh']);
+	//get User Info Authenticated by JWT
+	$router->post('me', ['middleware' => 'cors', 'uses' => 'AuthController@me']);
 	
+	//register
+	$router->post('User/Register/', ['middleware' => 'cors', 'uses' => 'UserController@createUser']);
+
+	//User
+	$router->get('User/{iduser}', ['middleware' => 'cors', 'uses' => 'AuthController@me']);
+	$router->post('User/{iduser}/Update/', ['middleware' => 'cors', 'uses' => 'UserController@updateData']);
+	$router->post('User/{iduser}/UpdatePassword/', ['middleware' => 'cors', 'uses' => 'UserController@updatePassword']);
+	$router->post('User/{iduser}/Updatephoto/', ['middleware' => 'cors', 'uses' => 'UserInfoController@updateProfilePhoto']);
+	$router->get('User/{iduser}/delete', ['middleware' => 'cors', 'uses' => 'UserController@deleteUser']);	
+	$router->post('User/{iduser}/setPassword', ['middleware' => 'cors', 'uses' => 'UserController@setPassword']);
+	
+	//password reset
+	$router->post('/password/email', ['middleware' => 'cors', 'uses' => 'PasswordController@postEmail']);
+	$router->post('/password/reset/{token}', ['middleware' => 'cors', 'uses' => 'PasswordController@postReset']);
+
+	//check email for duplicate
+	$router->post('/checkemail', ['middleware' => 'cors', 'uses' => 'UserController@findDuplicateEmail']);
+	$router->post('/checknickname', ['middleware' => 'cors', 'uses' => 'UserController@findDuplicateNickname']);
 });
 
 /**
- * API Route for Subcriptions
- * 
- * @return $route
+ * SNS routes
  */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->post('Subscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscribe']);
-	$router->post('Unsubscribe/', ['middleware' => 'cors', 'uses' => 'SubscriptionController@unsubscribe']);
-	$router->get('Subcriptionllist/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscriptionList']);
-	$router->get('Recent/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@recentSubscriptionList']);
-	$router->get('Subscription/History/{iduser}', ['middleware' => 'cors', 'uses' => 'SubscriptionController@subscriptionHistory']);
-});
-
-/**
- * API Route for comments
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->post('Comment/post/', ['middleware' => 'cors', 'uses' => 'CommentController@postComment']);
-	$router->post('Comment/delete/', ['middleware' => 'cors', 'uses' => 'CommentController@deleteComment']);
-	$router->get('Comment/count/{id}', ['middleware' => 'cors', 'uses' => 'CommentController@countComment']);
-	$router->get('Comment/{id}', ['middleware' => 'cors', 'uses' => 'CommentController@loadComment']);
-});
-
-/**
- * API Route for reply
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->post('Reply/post/', ['middleware' => 'cors', 'uses' => 'ReplyController@postReply']);
-	$router->post('Reply/delete/', ['middleware' => 'cors', 'uses' => 'ReplyController@deleteReply']);
-	$router->get('Reply/count/{id}', ['middleware' => 'cors', 'uses' => 'ReplyController@countReply']);
-	$router->get('Reply/{id}', ['middleware' => 'cors', 'uses' => 'ReplyController@loadReply']);
-});
-
-/**
- * API Route for userinfo mongodb
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Userinfo/', ['middleware' => 'cors', 'uses' => 'UserinfoController@all']);
-	$router->get('Userinfo/forAge/', ['middleware' => 'cors', 'uses' => 'UserinfoController@forAge']);
-});
-
-/**
- * API Route for Redis
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('totalreward/', ['middleware' => 'cors', 'uses' => 'RedisController@totalreward']);
-	$router->get('tag/', ['middleware' => 'cors', 'uses' => 'RedisController@loadAllTags']);
-	$router->get('tag/all', ['middleware' => 'cors', 'uses' => 'RedisController@loadAll']);
-});
-
-/**
- * API Route for Tags
- * 
- * @return $route
- */
-$router->group(['prefix' => 'api/'], function($router)
-{
-	$router->get('Content/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllContentTags']);
-	$router->get('Ads/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllAdsTags']);
-	$router->get('Advertiser/Tag/', ['middleware' => 'cors', 'uses' => 'TagController@readAllAdvertiserTags']);
-});
-
-$router->group(['prefix' => '/'], function($router)
-{
-	$router->get('google', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogle']);		
+$router->group(['prefix' => '/'], function($router){
+	//google web app
+    $router->get('google', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToGoogle']);		
 	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallback']);
-	$router->get('/facebook/login', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb) {
+
+	//google mobile app
+    $router->post('googleMobile', ['middleware' => 'cors', 'uses' => 'AuthController@findGoogleProvider']);
+
+	//facebook web app
+    // $router->get('facebook', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToFacebook']);		
+	// $router->get('facebook/callback', ['middleware' => 'cors', 'uses' => 'SnsController@facebookCallback']);
+	$router->get('facebook', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb) {
 		$login_link = $fb
             ->getRedirectLoginHelper()
-            ->getLoginUrl('https://uth702bpo.com/callback/facebook', ['email']);
+            ->getLoginUrl('https://api.coinslide.io/facebook/callback/', ['email']);
     
     		echo '<a href="' . $login_link . '">Log in with Facebook</a>';
 	});
-	$router->get('/facebook/callback', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb)
+	$router->get('facebook/callback/', function(SammyK\LaravelFacebookSdk\LaravelFacebookSdk $fb)
 	{
 		// Obtain an access token.
 		try {
 			$token = $fb->getAccessTokenFromRedirect();
 		} catch (Facebook\Exceptions\FacebookSDKException $e) {
-			dd($e->getMessage());
+			
+			return response()->json([
+				'message'	=>	$e->getMessage()
+			]);
 		}
-
+		$token = $fb->getAccessTokenFromRedirect();
 		// Access token will be null if the user denied the request
 		// or if someone just hit this URL outside of the OAuth flow.
 		if (! $token) {
@@ -213,16 +92,16 @@ $router->group(['prefix' => '/'], function($router)
 			$helper = $fb->getRedirectLoginHelper();
 
 			if (! $helper->getError()) {
-				abort(403, 'Unauthorized action.');
+				return response()->json([
+					'message'	=>	'Unauthorized action.'
+				]);
 			}
 
 			// User denied the request
-			dd(
-				$helper->getError(),
-				$helper->getErrorCode(),
-				$helper->getErrorReason(),
-				$helper->getErrorDescription()
-			);
+			return response()->json([
+				'message'	=> $helper->getErrorReason(),
+			]);
+
 		}
 
 		if (! $token->isLongLived()) {
@@ -254,13 +133,141 @@ $router->group(['prefix' => '/'], function($router)
 
 		// Create the user if it does not exist or update the existing entry.
 		// This will only work if you've added the SyncableGraphNodeTrait to your User model.
-		$user = App\User::createOrUpdateGraphNode($facebook_user);
+		// $user = App\User::createOrUpdateGraphNode($facebook_user);
 
 		// Log the user into Laravel
-		Auth::login($user);
+		// Auth::login($user);
 
-		return redirect('/')->with('message', 'Successfully logged in with Facebook');
+		return response()->json(
+			['token'	=> $facebook_user]
+		);
 	});
+
 });
 
+/**
+ * API Route for Contents
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{	
+	$router->get('Content/New', ['middleware' => 'cors', 'uses' => 'ContentController@newContent']);
+	$router->get('Content/Hot', ['middleware' => 'cors', 'uses' => 'ContentController@hotContent']);
+	$router->get('Content/Trending', ['middleware' => 'cors', 'uses' => 'ContentController@trendingContent']);
+
+	$router->get('Content/{idcontent}', ['middleware' => 'cors', 'uses' => 'ContentController@contentReadOne']);
+
+	$router->post('Content/Create', ['middleware' => 'cors', 'uses' => 'ContentController@createContent']);
+	$router->post('Content/createTemporary', ['middleware' => 'cors', 'uses' => 'ContentController@createTemporaryContent']);	
+	$router->get('Content/saveTempContent/{iduser}', ['middleware' => 'cors', 'uses' => 'ContentController@saveTempContent']);
+	$router->post('Content/{idcontent}/Update', ['middleware' => 'cors', 'uses' => 'ContentController@updateContent']);
+	$router->get('Content/{idcontent}/Delete', ['middleware' => 'cors', 'uses' => 'ContentController@deleteContent']);
+
+	//like routes
+	$router->post('Content/like/', ['middleware' => 'cors', 'uses' => 'LikeController@like']);
+	$router->post('Content/dislike/', ['middleware' => 'cors', 'uses' => 'LikeController@dislike']);
+	$router->get('Content/{idcontent}/countLike/', ['middleware' => 'cors', 'uses' => 'LikeController@countLike']);
+	$router->get('Content/{idcontent}/countDislike/', ['middleware' => 'cors', 'uses' => 'LikeController@countDislike']);
+
+	//comment routes
+	$router->post('Comment/post/', ['middleware' => 'cors', 'uses' => 'CommentController@postComment']);
+	$router->post('Comment/delete/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@deleteComment']);
+	$router->get('Comment/count/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@countComment']);
+	$router->get('Comment/{idcontent}', ['middleware' => 'cors', 'uses' => 'CommentController@loadComment']);
+
+	//reply routes
+	$router->post('Reply/post/', ['middleware' => 'cors', 'uses' => 'ReplyController@postReply']);
+	$router->post('Reply/delete/', ['middleware' => 'cors', 'uses' => 'ReplyController@deleteReply']);
+	$router->get('Reply/count/{idcomment}', ['middleware' => 'cors', 'uses' => 'ReplyController@countReply']);
+	$router->get('Reply/{idcomment}', ['middleware' => 'cors', 'uses' => 'ReplyController@loadReply']);
+
+	//tag routes
+	$router->get('contentTag', ['middleware' => 'cors', 'uses' => 'TagController@loadAllContentTag']);
+});
+
+/**
+ * API Route for Subscription and Ads
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->post('Ads/New', ['middleware' => 'cors', 'uses' => 'AdvertiseController@newAds']);
+	$router->post('Ads/Popular', ['middleware' => 'cors', 'uses' => 'AdvertiseController@popularAds']);
+
+	//tag routes
+	$router->get('adsTag', ['middleware' => 'cors', 'uses' => 'TagController@loadAlladsTag']);
+
+	//Ads CRUD
+	$router->post('Ads/create', ['middleware' => 'cors', 'uses' => 'AdvertiseController@createAds']);
+	$router->post('Ads/update', ['middleware' => 'cors', 'uses' => 'AdvertiseController@updateAds']);	
+
+	//Subscription, subscribe and unsubscribe
+	$router->get('User/{iduser}/SubscriptionList', ['middleware' => 'cors', 'uses' => 'AdvertiseController@subscriptionList']);
+	$router->get('User/{iduser}/SubscriptionHistory', ['middleware' => 'cors', 'uses' => 'UserActivityController@subscriptionHistory']);
+	$router->post('Ads/Subscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsSubscribe']);
+	$router->post('Ads/Unsubscribe', ['middleware' => 'cors', 'uses' => 'AdsSubscriptionController@adsUnsubscribe']);
+});
+
+/**
+ * API Route for banner
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('Banner', ['middleware' => 'cors', 'uses' => 'BannerController@readAllBanners']);
+	$router->get('Banner/read/{idbanner}', ['middleware' => 'cors', 'uses' => 'BannerController@readBanner']);
+	$router->get('Banner/active/', ['middleware' => 'cors', 'uses' => 'BannerController@activeBanner']);
+	$router->post('Banner/Search/', ['middleware' => 'cors', 'uses' => 'BannerController@searchBanner']);	
+	$router->post('Banner/create/', ['middleware' => 'cors', 'uses' => 'BannerController@createBanner']);
+	$router->post('Banner/update/{idbanner}', ['middleware' => 'cors', 'uses' => 'BannerController@updateBanner']);
+});
+
+/**
+ * API Route for Advertiser
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	//advertiser banner
+	$router->get('Advertiser/{idadvertiser}/Banner', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@bannerListbyAdvertiser']);
+	$router->get('Advertiser/{idadvertiser}/Banner/{idbanner}', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@loadSingleBanner']);
+	$router->post('Advertiser/{idadvertiser}/Banner/create', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@createAdvertiserBanner']);
+	$router->post('Advertiser/{idadvertiser}/Banner/{idbanner}/update', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@updateAdvertiserBanner']);
+	$router->get('Advertiser/{idadvertiser}/Banner/{idbanner}/delete', ['middleware' => 'cors', 'uses' => 'AdvertiserBannerController@deleteAdvertiserBanner']);
+
+	//advertiser
+	$router->get('Advertiser/{idadvertiser}', ['middleware' => 'cors', 'uses' => 'AdvertiserController@advertiserInfo']);
+	$router->post('Advertiser/Ads', ['middleware' => 'cors', 'uses' => 'AdvertiseController@readAds']);
+
+	//tag routes
+	$router->get('advertiserTag', ['middleware' => 'cors', 'uses' => 'TagController@loadAlladvertiserTag']);
+	
+});
+
+/**
+ * API Route for Redis
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('totalreward', ['middleware' => 'cors', 'uses' => 'RedisController@totalreward']);
+	$router->get('loadContentTag/{idcontent}', ['middleware' => 'cors', 'uses' => 'RedisController@loadContentTag']);
+	$router->get('loadAdsTag/{idads}', ['middleware' => 'cors', 'uses' => 'RedisController@loadAdsTag']);
+});
+
+/**
+ * API Route for refferal
+ * 
+ * @return $route
+ */
+$router->group(['prefix' => 'api/'], function($router)
+{
+	$router->get('refferal', ['middleware' => 'cors', 'uses' => 'RefferalController@loadAllRefferal']);
+	$router->post('refferal/register', ['middleware' => 'cors', 'uses' => 'RefferalController@insertRefferal']);
+});
 

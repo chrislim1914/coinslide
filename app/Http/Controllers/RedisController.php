@@ -6,22 +6,12 @@ use App\Http\Controllers\Controller;
 
 class RedisController extends Controller {
 
-    private $redis;
+    
     private $trredis;
-    private $otherdb = 1;
-    /**
-     * redis connection
-     */
-    public function __construct(){
-        $this->redis = new \Predis\Client([
-            'scheme' => getenv('REDIS_SCHEME'),
-            'host' => getenv('REDIS_HOST'),
-            'port' => getenv('REDIS_PORT'),
-            'password' => getenv('REDIS_PASS'),
-            'database' => $this->otherdb,
-        ]);
-    }
-
+    private $contentredis;
+    private $adsredis;
+    private $advertiserredis;
+    private $contentVCount;
     /**
      * load total reward
      * 
@@ -56,48 +46,172 @@ class RedisController extends Controller {
      */
     public function contentTag($tagno, $idcontent){
 
-        $contentno = 'content'.$idcontent;
-        $this->redis->hset($tagno, $contentno, $idcontent);
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        $this->contentredis->lpush($idcontent, $tagno);
     }
 
+    /**
+     * method to load tag by content
+     */
+    public function loadContentTag($idcontent){
+
+        $start = 0;
+        $end = -1;
+
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        return $this->contentredis->lrange($idcontent, $start, $end);
+    }
+
+    /**
+     * method to delete tag
+     */
+    public function deleteContentTag($idcontent){
+
+        $this->contentredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 2,
+        ]);
+
+        $this->contentredis->del($idcontent);
+    }
+    
     /**
      * method to save ads tags
      * 
      * @param $tagno, $idads
      */
     public function adsTag($tagno, $idads){
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
 
-        $adsno = 'ads'.$idads;
-        $this->redis->hset($tagno, $adsno, $idads);
+        $this->adsredis->lpush($idads, $tagno);
     }
 
     /**
-     * method to load all tags
-     * 
-     * @return response
+     * method to load tag by ads
      */
-    public function loadAllTags(){
+    public function loadAdsTag($idads){
 
-        $tag = $this->redis->keys('*');
+        $start = 0;
+        $end = -1;
 
-        return response()->json($tag);
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
+
+        return $this->adsredis->lrange($idads, $start, $end);
     }
 
     /**
-     * load all tags and its content or ads link
-     * 
-     * @return response
+     * method to delete tag
      */
-    public function loadAll(){
-        $tag = $this->redis->keys('*');
+    public function deleteAdsTag($idads){
 
-        for ($i = 0; $i < count($tag); $i++) {
-            $taglist = $this->redis->hgetall($tag[$i]);
-            $tags = $taglist;
-            $list[] = [$tag[$i] => $tags];
-        }
+        $this->adsredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 3,
+        ]);
 
-        return response()->json($list);
+        $this->adsredis->del($idcontent);
+    }
+
+    /**
+     * method to save advertiser tags
+     * 
+     * @param $tagno, $idads
+     */
+    public function advertiserTag($tagno, $idads){
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        $this->advertiserredis->lpush($idads, $tagno);
+    }
+
+    /**
+     * method to load tag by ads
+     */
+    public function loadAdvertiserTag($idads){
+
+        $start = 0;
+        $end = -1;
+
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        return $this->advertiserredis->lrange($idads, $start, $end);
+    }
+
+    /**
+     * method to delete tag
+     */
+    public function deleteAdvertiserTag($idads){
+
+        $this->advertiserredis = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 4,
+        ]);
+
+        $this->advertiserredis->del($idcontent);
+    }
+    
+    /**
+     * method to count number of viewed
+     */
+    public function contentViewCount($idcontent){
+
+        $this->contentVCount = new \Predis\Client([
+            'scheme' => getenv('REDIS_SCHEME'),
+            'host' => getenv('REDIS_HOST'),
+            'port' => getenv('REDIS_PORT'),
+            'password' => getenv('REDIS_PASS'),
+            'database' => 5,
+        ]);
+
+        $this->contentVCount->incr($idcontent);
+
+        return $this->contentVCount->get($idcontent);
     }
 }
 

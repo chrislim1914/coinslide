@@ -20,7 +20,7 @@ class Advertise extends Model implements AuthenticatableContract, AuthorizableCo
      * @var array
      */
     protected $fillable = [
-        'idadvertisers', 'adcategory', 'title', 'content', 'url', 'img', 'createdate', 'startdate', 'enddate'
+        'idadvertisers', 'title', 'content', 'url', 'img', 'createdate', 'startdate', 'enddate'
     ];
 
 }
