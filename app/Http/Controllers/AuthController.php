@@ -92,6 +92,9 @@ class AuthController extends Controller
         return response()->json(['token' => Auth::refresh()]);
     }
 
+    /**
+     * method to login google on mobile
+     */
     public function findGoogleProvider(Request $request){
 
         $snsProviderId = User::where('snsProviderId', $request->snsProviderId)->get();
@@ -99,18 +102,9 @@ class AuthController extends Controller
         if($snsProviderId->count() > 0){
             foreach($snsProviderId as $authuser){
                 // $token =  $this->jwt->attempt(['email' => $authuser->email, 'password' => $authuser->password]);
-                try {
-                    $user = Auth::user();
-                    $data['token'] = Auth::claims([
-                        'iduser'        => $authuser->iduser,
-                        'snsProviderId' => $authuser->snsProviderId,
-                    ])->attempt();
-                    $data['user'] =  $user;
-                    
-                    return response()->json([
-                        'message' => 'Success',
-                        'data' => $data
-                    ]);
+                try { 
+                    $user = User::where('snsProviderId', $request->snsProviderId)->first();
+                    $token = $this->jwt->fromUser($user);
                 } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
         
                     return response()->json(['token_invalid'], 500);
@@ -125,7 +119,8 @@ class AuthController extends Controller
 
             return response()->json([
                 "message" => "redirect to login.",
-                "data"     => $payload,
+                "userdata"     => $user,
+                "token"     => $token,
                 "result"  => true
             ]);
         }else{

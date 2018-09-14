@@ -306,39 +306,66 @@ class ContentController extends Controller
      */
     public function updateContent(Request $request, $idcontent){
 
-        if($request->file('image')<>null){
-            //get the image file
-            $photo = $request->file('image');
-            $utility = new UtilityController();
-            $newImage = $utility->contentResize($photo);
-
-            //set new name for image to save on database
-            $image = 'assets/content/'.time().'.'.$photo->getClientOriginalExtension(); 
-
-            //set directory to save the file
-            $destinationPath = $utility->public_path('/');           
-        }
-
+        $utility = new UtilityController();
+        $modifieddate = $utility->setDatetime();
 
         //find content info
         $Contents = Content::where('idcontent', $idcontent)
                             ->where('delete', 0)
                             ->get();
 
-        foreach($Contents as $newContents){
-            $image = $newContents->content_img;
-        }
+        if($Contents->count() > 0 ) {            
+            //check if image have content
+            if($request->file('image')==null){
+                $updateContents = Content::where('idcontent', $idcontent);
+                if($updateContents->update([
+                                    'title'         => $request->title,
+                                    'content'       => $request->content,
+                                    'description'   => $request->description,
+                                    'modifieddate'   => $modifieddate
+                                    ])) {                   
+                    
+                    /**
+                     * instantiate TagController and save on tag table
+                     * then get id everytime its save on $taglist
+                     */
+                    $tagCont = new TagController();
+                    $taglist = $tagCont->createContentTag($request->tag);
 
+                    $redis = new RedisController();
+                    $delTag = $redis->deleteContentTag($idcontent);
 
+                    /**
+                     * loop thru $taglist
+                     * then instantiate RedisController
+                     * hset everything on $taglist
+                     */
+                    for ($i = 0; $i < count($taglist); $i++) {
+                        $redis->contentTag($taglist[$i][0], $idcontent);
+                    }
+                    return response()->json([
+                        "message" => "",
+                        "result"  => true
+                    ]);
+                } else {
+                    return response()->json([
+                        "message" => "content save failed.",
+                        "result"  => false
+                    ]);
+                }
+                
+            }else{
+                //update content
+                $photo = $request->file('image');
+                $utility = new UtilityController();
+                $newImage = $utility->contentResize($photo);
 
-        if($Contents->count() > 0 ) {
+                //set new name for image to save on database
+                $image = 'assets/content/'.time().'.'.$photo->getClientOriginalExtension(); 
 
-            $utility = new UtilityController();
-            $modifieddate = $utility->setDatetime();
-
-
-            //update content
-            $updateContents = Content::where('idcontent', $idcontent);
+                //set directory to save the file
+                $destinationPath = $utility->public_path('/');           
+                $updateContents = Content::where('idcontent', $idcontent);
                 if($updateContents->update([
                                     'title'         => $request->title,
                                     'content'       => $request->content,
@@ -346,7 +373,7 @@ class ContentController extends Controller
                                     'content_img'   => $image,
                                     'modifieddate'   => $modifieddate
                                     ])) {
-                     //save to image to public/assets/banner folder
+                    //save to image to public/assets/banner folder
                     $newImage->save($destinationPath.'/'.$image,80);
                     
                     /**
@@ -377,11 +404,11 @@ class ContentController extends Controller
                         "result"  => false
                     ]);
                 }
+            }
         } else {
-            return response()->json([
-                "message" => "Content not found.",
-                "result"  => false
-            ]);
+            echo json_encode(
+                array("message" => "Content not found.")
+            );   
         }        
     }
 
@@ -401,7 +428,7 @@ class ContentController extends Controller
         $content = DB::table('contents')
                         ->join('users', 'contents.iduser', '=', 'users.iduser')               
                         ->select('contents.idcontent', 'contents.iduser', 'users.nickname', 'contents.title', 'contents.content', 'contents.description',
-                                'contents.createdate', 'contents.modifieddate', 'contents.delete')
+                                'contents.content_img', 'contents.createdate', 'contents.modifieddate', 'contents.delete')
                         ->where('contents.delete', 0)
                         ->where('contents.idcontent', $idcontent)
                         ->get();          
@@ -440,7 +467,8 @@ class ContentController extends Controller
                 $content = [
                     'idcontent' => $new->idcontent,
                     'iduser' => $new->iduser,
-                    'content_img' => $photo,
+                    'userphoto' => $photo,
+                    'content_img' => $new->content_img,
                     'nickname' => $new->nickname,
                     'title' => $new->title,
                     'content' => $new->content,
