@@ -7,7 +7,7 @@
     <title>Document</title>
 </head>
 <body>
-    <a href="http://localhost:8900/google">Google +</a><br />
+    <a href="https://api.coinslide.io/googleMobile/callback">Google +</a><br />
     <a href="http://localhost:8900/facebook/login">facebook</a><br />
 </body>
 </html>

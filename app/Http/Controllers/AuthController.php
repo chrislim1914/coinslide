@@ -101,10 +101,14 @@ class AuthController extends Controller
 
         if($snsProviderId->count() > 0){
             foreach($snsProviderId as $authuser){
-                // $token =  $this->jwt->attempt(['email' => $authuser->email, 'password' => $authuser->password]);
                 try { 
                     $user = User::where('snsProviderId', $request->snsProviderId)->first();
-                    $token = $this->jwt->fromUser($user);
+                    if(! $token = $this->jwt->fromUser($user)){
+                        return response()->json([
+                            'message' => 'credential not valid',
+                            'result'=> false
+                        ]);
+                    }
                 } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
         
                     return response()->json(['token_invalid'], 500);

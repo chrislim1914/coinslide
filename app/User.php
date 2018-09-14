@@ -36,7 +36,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * @var array
      */
     protected $hidden = [
-        'password', 
+        'password'
     ];
 
     /**
@@ -56,8 +56,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function getJWTCustomClaims()
     {
-        return [
-            'snsProviderId' => $this->snsProviderId
-        ];
+        return [];
     }
 }
