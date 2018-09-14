@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\JWTAuth;
 
 
 class UserController extends Controller
@@ -383,23 +384,6 @@ class UserController extends Controller
             return response()->json([
                 "message" => "nickname does not exist.",
                 "result"  => true
-            ]);
-        }
-    }
-
-    public function findGoogleProvider(Request $request){
-
-        $user = User::where('snsProviderId', $request->snsProviderId)->get();
-
-        if($user->count() > 0){
-            return response()->json([
-                "message" => "redirect to login.",
-                "result"  => true
-            ]);
-        }else{
-            return response()->json([
-                "message" => "account dont exist.",
-                "result"  => false
             ]);
         }
     }

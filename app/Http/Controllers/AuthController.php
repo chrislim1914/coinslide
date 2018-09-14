@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Tymon\JWTAuth\JWTAuth;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class AuthController extends Controller
 {
@@ -89,5 +90,49 @@ class AuthController extends Controller
      */
     public function refresh(){
         return response()->json(['token' => Auth::refresh()]);
+    }
+
+    public function findGoogleProvider(Request $request){
+
+        $snsProviderId = User::where('snsProviderId', $request->snsProviderId)->get();
+
+        if($snsProviderId->count() > 0){
+            foreach($snsProviderId as $authuser){
+                // $token =  $this->jwt->attempt(['email' => $authuser->email, 'password' => $authuser->password]);
+                try {
+                    $user = Auth::user();
+                    $data['token'] = Auth::claims([
+                        'iduser'        => $authuser->iduser,
+                        'snsProviderId' => $authuser->snsProviderId,
+                    ])->attempt();
+                    $data['user'] =  $user;
+                    
+                    return response()->json([
+                        'message' => 'Success',
+                        'data' => $data
+                    ]);
+                } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
+        
+                    return response()->json(['token_invalid'], 500);
+        
+                } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
+        
+                    return response()->json(['error creating token' => $e->getMessage()], 500);
+        
+                }
+                // $payload = $this->jwt->setToken($token)->getPayload();
+            }
+
+            return response()->json([
+                "message" => "redirect to login.",
+                "data"     => $payload,
+                "result"  => true
+            ]);
+        }else{
+            return response()->json([
+                "message" => "account dont exist.",
+                "result"  => false
+            ]);
+        }
     }
 }

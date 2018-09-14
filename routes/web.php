@@ -61,7 +61,7 @@ $router->group(['prefix' => '/'], function($router){
 	$router->get('google/callback', ['middleware' => 'cors', 'uses' => 'SnsController@googleCallback']);
 
 	//google mobile app
-    $router->post('googleMobile', ['middleware' => 'cors', 'uses' => 'UserController@findGoogleProvider']);
+    $router->post('googleMobile', ['middleware' => 'cors', 'uses' => 'AuthController@findGoogleProvider']);
 
 	//facebook web app
     // $router->get('facebook', ['middleware' => 'cors', 'uses' => 'SnsController@redirectToFacebook']);		
@@ -152,7 +152,7 @@ $router->group(['prefix' => '/'], function($router){
  */
 $router->group(['prefix' => 'api/'], function($router)
 {	
-	$router->get('Content/New', ['middleware' => 'cors', 'uses' => 'ContentController@newContent']);
+	$router->get('Content/New', ['middleware' => 'auth', 'uses' => 'ContentController@newContent']);
 	$router->get('Content/Hot', ['middleware' => 'cors', 'uses' => 'ContentController@hotContent']);
 	$router->get('Content/Trending', ['middleware' => 'cors', 'uses' => 'ContentController@trendingContent']);
 
