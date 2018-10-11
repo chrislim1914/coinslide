@@ -109,23 +109,21 @@ class AuthController extends Controller
                             'result'=> false
                         ]);
                     }
-                } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-        
-                    return response()->json(['token_invalid'], 500);
-        
-                } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {
-        
-                    return response()->json(['error creating token' => $e->getMessage()], 500);
-        
-                }
-                // $payload = $this->jwt->setToken($token)->getPayload();
+                } catch (\Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {        
+                    return response()->json([
+                        'token_invalid' => $e->getMessage(),
+                        'result'        => false
+                    ]);        
+                } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {        
+                    return response()->json(['error creating token' => $e->getMessage()], 500);        
+                }                
             }
 
             return response()->json([
-                "message" => "redirect to login.",
-                "userdata"     => $user,
-                "token"     => $token,
-                "result"  => true
+                "message"       => "redirect to login.",
+                "userdata"      => $user,
+                "token"         => $token,
+                "result"        => true
             ]);
         }else{
             return response()->json([

@@ -77,10 +77,11 @@ class UserController extends Controller
         $User = new User();
         // $User->first_name = $request->first_name;
         // $User->last_name = $request->last_name;
-        $User->phone = $request->phone;
-        $User->email = $request->email;
-        $User->nickname = $request->nickname;
-        $User->password = $hash->hash($request->password);//password hash
+        $User->phone         = $request->phone;
+        $User->email         = $request->email;
+        $User->nickname      = $request->nickname;
+        $User->password      = $hash->hash($request->password);//password hash
+        $User->snsProviderId = $request->snsProviderId == null ? '' : $request->snsProviderId;
         
         if($User->save()) {
             //retrieved the new inserted iduser
@@ -99,7 +100,7 @@ class UserController extends Controller
             $userinfo->save();
 
             return response()->json([
-                "message" => "Save Success!",
+                "message" => "",
                 "result"  => true
             ]);
         } else {
