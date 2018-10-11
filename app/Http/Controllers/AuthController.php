@@ -49,8 +49,9 @@ class AuthController extends Controller
 
         }
         return response()->json([
-            'message' => 'login ok',
-            'token' => "$token",
+            'message'   => 'login ok',
+            'token'     => "$token",
+            'result'    => true
         ]);
     }
 
@@ -80,7 +81,10 @@ class AuthController extends Controller
         
         Auth::logout();
 
-        return response()->json(['message' => 'Successfully logged out']);
+        return response()->json([
+            'message'   => 'Successfully logged out',
+            'result'    => true
+            ]);
     }
 
     /**
@@ -89,7 +93,10 @@ class AuthController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */
     public function refresh(){
-        return response()->json(['token' => Auth::refresh()]);
+        return response()->json([
+            'token'     => Auth::refresh(),
+            'result'    =>  true
+            ]);
     }
 
     /**
@@ -115,7 +122,10 @@ class AuthController extends Controller
                         'result'        => false
                     ]);        
                 } catch (\Tymon\JWTAuth\Exceptions\JWTException $e) {        
-                    return response()->json(['error creating token' => $e->getMessage()], 500);        
+                    return response()->json([
+                        'error creating token' => $e->getMessage(),
+                        'result'        => false
+                    ]);        
                 }                
             }
 

@@ -36,7 +36,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 1])) {
                             return response()->json([
-                                "message" => "like."
+                                'message'   => 'like.',
+                                'result'    => true
                             ]);
                         }
                         break;
@@ -45,7 +46,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 2])) {
                             return response()->json([
-                                "message" => "value change."
+                                'message' => 'value change.',
+                                'result'    => false
                             ]);
                         }
                         break;
@@ -54,7 +56,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 1])) {
                             return response()->json([
-                                "message" => "like."
+                                'message' => 'like.',
+                                'result'    => false
                             ]);
                         }
                         break;
@@ -64,7 +67,7 @@ class LikeController extends Controller
 
         } else {
 
-            //like the freash content
+            //like the fresh content
             $like = new Likes();
             $like->idcontent = $request->idcontent;
             $like->iduser    = $request->iduser;
@@ -72,11 +75,13 @@ class LikeController extends Controller
 
             if($like->save()) {
                 return response()->json([
-                    "message" => "like."
+                    'message' => 'like.',
+                    'result'    => true
                 ]);
             } else {
                 return response()->json([
-                    "message" => "Failed so like the content."
+                    'message' => 'Failed so like the content.',
+                    'result'    => false
                 ]);
             }
         }
@@ -109,7 +114,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 2])) {
                             return response()->json([
-                                "message" => "value change."
+                                'message' => 'value change.',
+                                'result'    => true
                             ]);
                         }
                         break;
@@ -118,7 +124,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 0])) {
                             return response()->json([
-                                "message" => "disliked."
+                                'message' => 'disliked.',
+                                'result'    => false
                             ]);
                         }
                         break;
@@ -127,7 +134,8 @@ class LikeController extends Controller
                         $updatelike = Likes::where('idlike', $lookup->idlike);
                         if($updatelike->update(['islike' => 0])) {
                             return response()->json([
-                                "message" => "disliked."
+                                'message' => 'disliked.',
+                                'result'    => false
                             ]);
                         }
                         break;
@@ -142,11 +150,13 @@ class LikeController extends Controller
 
             if($like->save()) {
                 return response()->json([
-                    "message" => "disliked."
+                    'message' => 'disliked.',
+                    'result'    => true
                 ]);
             } else {
                 return response()->json([
-                    "message" => "failed to disliked."
+                    'message' => 'failed to disliked.',
+                    'result'    => false
                 ]);
             }
         }

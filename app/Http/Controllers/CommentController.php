@@ -25,13 +25,22 @@ class CommentController extends Controller {
         $postComment->iduser = $request->iduser;
         $postComment->content = $request->content;
 
+        if($request->iduser == null){
+            return response()->json([
+                'message'   => 'you must login to post comment.',
+                'result'    =>  false
+            ]);
+        }
+
         if($postComment->save()){
             return response()->json([
-                "message" => "comment posted."
+                'message'   => 'comment posted.',
+                'result'    =>  true
             ]);
         } else {
             return response()->json([
-                "message" => "failed to post comment."
+                'message'   => 'failed to post comment.',
+                'result'    =>  false
             ]);
         }
     }
@@ -61,21 +70,25 @@ class CommentController extends Controller {
                             'delete' => 1
                         ])){
                         return response()->json([
-                            "message" => "comment deleted."
+                            'message'   => 'comment deleted.',
+                            'result'    =>  true
                         ]);
                     } else {
                         return response()->json([
-                            "message" => "comment already deleted."
+                            'message'   => 'comment already deleted.',
+                            'result'    =>  false
                         ]);
                     }
                 } else {
                     return response()->json([
-                        "message" => "you are not allowed to delete this post."
+                        'message'   => 'you are not allowed to delete this post.',
+                        'result'    =>  false
                     ]);
                 }
         } else {
             return response()->json([
-                "message" => "failed in retrieving comment info."
+                'message'   => 'failed in retrieving comment info.',
+                'result'    =>  true
             ]);
         }
     }
@@ -94,11 +107,13 @@ class CommentController extends Controller {
 
         if($count){
             return response()->json([
-                "comment" => "$count"
+                'comment'   => '$count',
+                'result'    =>  true
             ]);
         } else {
             return response()->json([
-                "comment" => "0"
+                'comment'   => '0',
+                'result'    =>  false
             ]);
         }
     }
@@ -169,12 +184,17 @@ class CommentController extends Controller {
                 ];
                 
             }
-            
-            return response()->json($array);
+
+            return response()->json([
+                'data'      => $array,
+                'result'    => true
+            ]);
+
         } else {
-            echo json_encode(
-                array("message" => "No Comments are found.")
-            );
+            return response()->json([
+                'message'   => 'No Comments are found.',
+                'result'    => true
+            ]);
         }
     }
 

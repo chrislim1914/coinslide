@@ -57,13 +57,13 @@ class ContentController extends Controller
                 }
     
                 return response()->json([
-                    "message" => "",
-                    "result"  => true
+                    'message' => '',
+                    'result'  => true
                 ]);
             } else {
                 return response()->json([
-                    "message" => "Failed to create new Content.",
-                    "result"  => false
+                    'message' => 'Failed to create new Content.',
+                    'result'  => false
                 ]);
             }
 
@@ -112,13 +112,13 @@ class ContentController extends Controller
             }
 
             return response()->json([
-                "message" => "",
-                "result"  => true
+                'message' => '',
+                'result'  => true
             ]);
         } else {
             return response()->json([
-                "message" => "Failed to create new Content.",
-                "result"  => false
+                'message' => 'Failed to create new Content.',
+                'result'  => false
             ]);
         }
     }
@@ -171,19 +171,19 @@ class ContentController extends Controller
                         $redis->contentTag($taglist[$i][0], $idcontent);
                     }
                     return response()->json([
-                        "message" => "",
-                        "result"  => true
+                        'message' => '',
+                        'result'  => true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "there is nothing to update.",
-                        "result"  => false
+                        'message' => 'there is nothing to update.',
+                        'result'  => false
                     ]);
                 }
         } else {
             return response()->json([
-                "message" => "No list content are found.",
-                "result"  => false
+                'message' => 'No list content are found.',
+                'result'  => false
             ]);
         }
     }
@@ -230,13 +230,13 @@ class ContentController extends Controller
                 }
     
                 return response()->json([
-                    "message" => "",
-                    "result"  => true
+                    'message' => '',
+                    'result'  => true
                 ]);
             } else {
                 return response()->json([
-                    "message" => "Failed to create new Content.",
-                    "result"  => false
+                    'message' => 'Failed to create new Content.',
+                    'result'  => false
                 ]);
             }
         }
@@ -286,13 +286,13 @@ class ContentController extends Controller
             }
 
             return response()->json([
-                "message" => "",
-                "result"  => true
+                'message' => '',
+                'result'  => true
             ]);
         } else {
             return response()->json([
-                "message" => "Failed to create new Content.",
-                "result"  => false
+                'message' => 'Failed to create new Content.',
+                'result'  => false
             ]);
         }
     }
@@ -344,13 +344,13 @@ class ContentController extends Controller
                         $redis->contentTag($taglist[$i][0], $idcontent);
                     }
                     return response()->json([
-                        "message" => "",
-                        "result"  => true
+                        'message' => '',
+                        'result'  => true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "content save failed.",
-                        "result"  => false
+                        'message' => 'content save failed.',
+                        'result'  => false
                     ]);
                 }
                 
@@ -395,20 +395,21 @@ class ContentController extends Controller
                         $redis->contentTag($taglist[$i][0], $idcontent);
                     }
                     return response()->json([
-                        "message" => "",
-                        "result"  => true
+                        'message' => '',
+                        'result'  => true
                     ]);
                 } else {
                     return response()->json([
-                        "message" => "content save failed.",
-                        "result"  => false
+                        'message' => 'content save failed.',
+                        'result'  => false
                     ]);
                 }
             }
         } else {
-            echo json_encode(
-                array("message" => "Content not found.")
-            );   
+            return response()->json([
+                'message' => 'Content not found.',
+                'result'  => false
+            ]);   
         }        
     }
 
@@ -510,10 +511,15 @@ class ContentController extends Controller
                 'viewcount'     => $count,
                 'useractivity'  => $activity
             ];
-            return response()->json($contentData);    
+            
+            return response()->json([
+                'data'      => $contentData,
+                'result'    => true
+            ]); 
         } else {
             return response()->json([
-                "message" => "Content not found."
+                'message' => 'No Content are found.',
+                'result'    => false
             ]);
         }        
     }
@@ -621,10 +627,14 @@ class ContentController extends Controller
 
             }
             
-            return response()->json($array);
+            return response()->json([
+                'data'      => $array,
+                'result'    => true
+            ]);
         } else {
             return response()->json([
-                "message" => "No Content are found."
+                'message' => 'No Content are found.',
+                'result'    => false
             ]);
         }
     }
@@ -739,14 +749,19 @@ class ContentController extends Controller
                     ];
                 } else {
                     return response()->json([
-                        "message" => "No Content are found."
+                        'message' => 'No Content are found.',
+                        'result'    => false
                     ]);
                 }
             }
-            return response()->json($array);
+            return response()->json([
+                'data'      => $array,
+                'result'    => true
+            ]);
         } else {
             return response()->json([
-                "message" => "No Content are found."
+                'message' => 'No Content are found.',
+                'result'    => false
             ]);
         }
     }
@@ -860,14 +875,16 @@ class ContentController extends Controller
                     ];
                 } else {
                     return response()->json([
-                        "message" => "No Content are found."
+                        'message'   => 'No Content are found.',
+                        'result'    => true
                     ]);
                 }
             }
             return response()->json($array);
         } else {
             return response()->json([
-                "message" => "No Content are found."
+                'message'   => 'No Content are found.',
+                'result'    => false
             ]);
         }
     }

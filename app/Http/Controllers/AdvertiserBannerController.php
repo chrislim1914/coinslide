@@ -34,11 +34,15 @@ class AdvertiserBannerController extends Controller
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $advertises;
 
-        if($cursor->count() > 0 ) {                
-                return response()->json($cursor);
+        if($cursor->count() > 0 ) {  
+                return response()->json([
+                    'data'      =>  $cursor,
+                    'result'    =>  true 
+                ]);
         } else {
             return response()->json([
-                'message'   => 'failed to save banner content'
+                'mesaage' => 'failed to save banner content',
+                'result'    =>  false
             ]);
         }        
     }
@@ -76,11 +80,13 @@ class AdvertiserBannerController extends Controller
 
         if($AdsBanner->save()){
             return response()->json([
-                'message'   => 'New banner save!'
+                'mesaage'   => 'New banner save!',
+                'result'    =>  true
             ]);
         }else{
             return response()->json([
-                'message'   => 'failed to save banner content'
+                'mesaage' => 'failed to save banner content',
+                'result'    =>  false
             ]);
         }
 
@@ -127,29 +133,21 @@ class AdvertiserBannerController extends Controller
                 'use'           => $request->use,
                 ])){
                 return response()->json([
-                    'message'   => 'banner updated!'
+                    'mesaage'   => 'banner updated!',
+                    'result'    =>  true
                 ]);
             }else{
                 return response()->json([
-                    'message'   => 'failed to update'
+                    'mesaage'   => 'failed to update',
+                    'result'    =>  true
                 ]);
             }
         }else{
             return response()->json([
-                'message'   => 'Error loading Banner info.'
+                'mesaage'   => 'Error loading Banner info.',
+                'result'    =>  true
             ]);
         }
-    }
-
-     /**
-     * method to delete banner
-     * 
-     * @param Request $request, $idadvertiser, $idbanner
-     * 
-     * @return response
-     */
-    public function deleteAdvertiserBanner($idadvertiser, $idbanner){
-        
     }
 
     /**
@@ -164,10 +162,14 @@ class AdvertiserBannerController extends Controller
                                     ->where('advertiser_banners.idadvertiser_banner', $idbanner)->get();
         
         if($banner->count() > 0){
-            return response()->json($banner);
+            return response()->json([                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+                'data'      => $banner,
+                'result'    =>  true
+            ]);
         }else{
             return response()->json([
-                'message'   => 'Advertiser dont have banner yet.'
+                'mesaage'   => 'Advertiser dont have banner yet.',
+                'result'    =>  false
             ]);
         }
     }

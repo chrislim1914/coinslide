@@ -23,7 +23,8 @@ class RefferalController extends Controller
 
         if($check->count() > 0){
             return response()->json([
-                'message'   =>  'theres something wrong. this name is already been use in refferal bonus.'
+                'message'   =>  'theres something wrong. this name is already been use in refferal bonus.',
+                'result'    => false
             ]);
         }
 
@@ -32,7 +33,8 @@ class RefferalController extends Controller
 
         if($checkRefferedBy->count() <= 0){
             return response()->json([
-                'message'   =>  'the refferal name dont exist.'
+                'message'   =>  'the refferal name dont exist.',
+                'result'    => false
             ]);
         }
         
@@ -43,11 +45,13 @@ class RefferalController extends Controller
 
         if($refferal->save()){
             return response()->json([
-                'message'   =>  'New Referral info save.'
+                'message'   =>  'New Referral info save.',
+                'result'    => true
             ]);
         }else{
             return response()->json([
-                'message'   =>  'failed to save refferal info.'
+                'message'   =>  'failed to save refferal info.',
+                'result'    => false
             ]);
         }
     }

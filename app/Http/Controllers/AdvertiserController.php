@@ -55,7 +55,11 @@ class AdvertiserController extends Controller
             'tag'        => $advertisertag
         ];
 
-        return response()->json($arrayData);
+        return response()->json([                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+            'data'      => $arrayData,
+            'result'    =>  true
+        ]);
+
     }
 
     /**
@@ -110,11 +114,13 @@ class AdvertiserController extends Controller
                 // $send = new SendMail();
                 // $sendit = $send->sendMail($request->email,$verificationCode);
             return response()->json([
-                'message'   => 'Email has been sent.'
+                'message'   => 'Email has been sent.',
+                'result'    =>  true
             ]);
         } else {
             return response()->json([
-                'message'   => 'failed to create user.'
+                'message'   => 'failed to create user.',
+                'result'    => false
             ]);
         }
     }
@@ -137,18 +143,21 @@ class AdvertiserController extends Controller
             if($insertPass->update([
                 'password' => $hash->hash($request->password)//password hash
             ])){
-                echo json_encode(
-                    array("message" => "Password is set.")
-                );
+                return response()->json([
+                    'message'   => 'Password is set.',
+                    'result'    =>  true
+                ]);
             } else {
-                echo json_encode(
-                    array("message" => "Failed to set password.")
-                );
+                return response()->json([
+                    'message'   => 'Failed to set password.',
+                    'result'    =>  false
+                ]);
             }
         } else {
-            echo json_encode(
-                array("message" => "advertiser not found.")
-            );
+            return response()->json([
+                'message'   => 'advertiser not found.',
+                'result'    =>  false
+            ]);
         }
     }
 }

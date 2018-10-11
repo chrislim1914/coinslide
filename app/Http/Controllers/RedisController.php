@@ -34,8 +34,10 @@ class RedisController extends Controller {
         ]);    
 
         $title = getenv('APP_NAME');
+
         return response()->json([
-            "message" => $this->trredis->hget($title,'totalreward')
+            'message'   => $this->trredis->hget($title,'totalreward'),
+            'result'    => true
             ]);     
     }
 

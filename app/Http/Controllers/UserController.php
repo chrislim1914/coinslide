@@ -49,8 +49,8 @@ class UserController extends Controller
             return response()->json($collection);
         } else {
             return response()->json([
-                "message" => "User dont exist!",
-                "result"  => false
+                'message' => 'User dont exist!',
+                'result'  => false
             ]);
         }
         
@@ -68,8 +68,8 @@ class UserController extends Controller
         $Users  = User::where('email', $request->email)->get();
         if($Users->count() > 0){
             return response()->json([
-                "message" => "User already exist!",
-                "result"  => false
+                'message' => 'User already exist!',
+                'result'  => false
             ]);
         }   
 
@@ -100,13 +100,13 @@ class UserController extends Controller
             $userinfo->save();
 
             return response()->json([
-                "message" => "",
-                "result"  => true
+                'message' => '',
+                'result'  => true
             ]);
         } else {
             return response()->json([
-                "message" => "failed to save!",
-                "result"  => false
+                'message' => 'failed to save!',
+                'result'  => false
             ]);
         }  
     }
@@ -129,8 +129,8 @@ class UserController extends Controller
 
         if($Users->count() <= 0 ) {
             return response()->json([
-                "message" => "User not found.",
-                "result"  => false
+                'message' => 'User not found.',
+                'result'  => false
             ]);
         }
 
@@ -160,19 +160,19 @@ class UserController extends Controller
             $userinfo->updateUserInfo($id,$userdata);
             
             return response()->json([
-                "message" => "User information updated."
+                'message' => 'User information updated.'
                 ]);
         } else {
             //update userinformations
             if($userinfo->updateUserInfo($id,$userdata)){
                 return response()->json([
-                    "message" => "User information updated.",
-                    "result"  => true
+                    'message' => 'User information updated.',
+                    'result'  => true
                     ]);
             } else {
                 return response()->json([
-                    "message" => "there is nothing to updated.",
-                    "result"  => false
+                    'message' => 'there is nothing to updated.',
+                    'result'  => false
                     ]);
             }
             /**
@@ -180,8 +180,8 @@ class UserController extends Controller
              * if data is untouch or clean
              */
             return response()->json([
-                "message" => "Failed to update",
-                "result"  => false
+                'message' => 'Failed to update',
+                'result'  => false
                 ]);
         }
     }
@@ -224,22 +224,22 @@ class UserController extends Controller
                  */
                 if($hash->verifyPassword($inputPass, $oldPass)) {
                     return response()->json([
-                        "message" => "there is nothing to update.",
-                        "result"  => false
+                        'message' => 'there is nothing to update.',
+                        'result'  => false
                     ]);
                 } else {
                     //update password
                     $updateUser = User::where('iduser', $id);
                     $updateUser->update(['password' => $hash->hash($inputPass)]);
                     return response()->json([
-                        "message" => "User password Updated.",
-                        "result"  => true
+                        'message' => 'User password Updated.',
+                        'result'  => true
                     ]);             
                 } 
         } else {
             return response()->json([
-                "message" => "User not found.",
-                "result"  => false
+                'message' => 'User not found.',
+                'result'  => false
             ]);
         }
     }
@@ -263,23 +263,23 @@ class UserController extends Controller
             $deleteUser = User::where('iduser', $id);
             if($deleteUser->update(['delete' => '1'])){
                 return response()->json([
-                    "message" => "Account is Deleted.",
-                    "result"  => true
+                    'message' => 'Account is Deleted.',
+                    'result'  => true
                 ]);
             } else {
                 return response()->json([
-                    "message" => "Account Deletion Failed.",
-                    "result"  => false
+                    'message' => 'Account Deletion Failed.',
+                    'result'  => false
                 ]);
                 return response()->json([
-                    "message" => "Account Deletion Failed.",
-                    "result"  => false
+                    'message' => 'Account Deletion Failed.',
+                    'result'  => false
                 ]);
             }              
         } else {
             return response()->json([
-                "message" => "User not found.",
-                "result"  => false
+                'message' => 'User not found.',
+                'result'  => false
             ]);    
         }
     }
@@ -313,19 +313,19 @@ class UserController extends Controller
                 'password' => $hash->hash($request->password)
                 ])) {
                 return response()->json([
-                    "message" => "User password is set.",
-                    "result"  => true
+                    'message' => 'User password is set.',
+                    'result'  => true
                 ]);
             }else {
                 return response()->json([
-                    "message" => "failed to set password.",
-                    "result"  => false
+                    'message' => 'failed to set password.',
+                    'result'  => false
                 ]);
             }            
         } else {
             return response()->json([
-                "message" => "User not found.",
-                "result"  => false
+                'message' => 'User not found.',
+                'result'  => false
             ]);
         }
     }
@@ -349,13 +349,13 @@ class UserController extends Controller
 
         if($cursor->count() > 0 ){
             return response()->json([
-                "message" => "email exist.",
-                "result"  => false
+                'message' => 'email exist.',
+                'result'  => false
             ]);
         }else{
             return response()->json([
-                "message" => "email does not exist.",
-                "result"  => true
+                'message' => 'email does not exist.',
+                'result'  => true
             ]);
         }
     }
@@ -378,13 +378,13 @@ class UserController extends Controller
 
         if($cursor->count() > 0 ){
             return response()->json([
-                "message" => "nickname exist.",
-                "result"  => false
+                'message' => 'nickname exist.',
+                'result'  => false
             ]);
         }else{
             return response()->json([
-                "message" => "nickname does not exist.",
-                "result"  => true
+                'message' => 'nickname does not exist.',
+                'result'  => true
             ]);
         }
     }

@@ -26,11 +26,13 @@ class ReplyController extends Controller {
 
         if($postComment->save()){
             return response()->json([
-                "message" => "reply posted."
+                'message'   => 'reply posted.',
+                'result'    => true
             ]);
         } else {
             return response()->json([
-                "message" => "failed to post reply."
+                'message' => 'failed to post reply.',
+                'result'    => false
             ]);
         }
     }
@@ -61,21 +63,25 @@ class ReplyController extends Controller {
                             'delete' => 1
                         ])){
                         return response()->json([
-                            "message" => "reply deleted."
+                            'message' => 'reply deleted.',
+                            'result'    => true
                         ]);
                     } else {
                         return response()->json([
-                            "message" => "reply is already deleted."
+                            'message' => 'reply is already deleted.',
+                            'result'    => false
                         ]);
                     }
                 } else {
                     return response()->json([
-                        "message" => "you are not allowed to delete this post."
+                        'message' => 'you are not allowed to delete this post.',
+                        'result'    => false
                     ]);
                 }
         } else {
             return response()->json([
-                "message" => "failed in retrieving reply info."
+                'message' => 'failed in retrieving reply info.',
+                'result'    => false
             ]);
         }
     }
@@ -94,11 +100,13 @@ class ReplyController extends Controller {
 
         if($count){
             return response()->json([
-                "reply" => "$count"
+                'reply'     => '$count',
+                'result'    => true
             ]);
         } else {
             return response()->json([
-                "reply" => "0"
+                'reply'     => '0',
+                'result'    => true
             ]);
         }
     }
@@ -163,11 +171,15 @@ class ReplyController extends Controller {
                 
             }
             
-            return response()->json($array);
-        } else {
-            echo json_encode(
-                array("message" => "No Replies are found.")
-            );
+            return response()->json([
+                'data'      =>  $array,
+                'result'    => false
+            ]);
+        } else {            
+            return response()->json([
+                'message'   =>  'No Replies are found.',
+                'result'    => false
+            ]);
         }
     }    
 }

@@ -74,12 +74,14 @@ class UserInfoController extends Controller
                             'profilephoto' => $newName,
                         ])) {
                 return response()->json([
-                    "message" => "Profile photo updated"
+                    'message'   => 'Profile photo updated',
+                    'result'    => false
                 ]);
             }
         } else {
             return response()->json([
-                "message" => "client not found."
+                'message'   => 'client not found.',
+                'result'    => false
             ]);
         }
     }

@@ -24,11 +24,15 @@ class BannerController extends Controller
         $cursor = $Banner;
 
         if($cursor->count() > 0 ) {
-            return response()->json($cursor);
+            return response()->json([
+                'data'      => $cursor,
+                'result'    => true
+            ]);
         } else {
-            echo json_encode(
-                array("message" => "No Banner are found.")
-            );
+            return response()->json([
+                'message'   => 'No Banner are found.',
+                'result'    => true
+            ]);
         }
     }
 
@@ -47,11 +51,15 @@ class BannerController extends Controller
         $cursor = $Banner;
 
         if($cursor->count() > 0 ) {
-            return response()->json($cursor);
+            return response()->json([
+                'data'      => $cursor,
+                'result'    => true
+            ]);
         } else {
-            echo json_encode(
-                array("message" => "Banner not found.")
-            );
+            return response()->json([
+                'message'   => 'No Banner are found.',
+                'result'    => true
+            ]);
         }
     }
 
@@ -72,11 +80,15 @@ class BannerController extends Controller
             $active = Banner::where('enddate', '>=', $now)->get();
 
             //load the active banner
-            return response()->json($active);
+            return response()->json([
+                'data'      => $active,
+                'result'    => true
+            ]);
         } else {
-            echo json_encode(
-                array("message" => "No Banner are found.")
-            );
+            return response()->json([
+                'message'   => 'No Banner are found.',
+                'result'    => true
+            ]);
         }
     }
 
@@ -92,9 +104,10 @@ class BannerController extends Controller
          * check if search string is null before we query
          */
         if($request->search == null) {
-            echo json_encode(
-                array("message" => "No Search String.")
-            );
+            return response()->json([
+                'message'   => 'Search String is empty.',
+                'result'    => true
+            ]);
         } else {
 
             $Banner = Banner::where('title', 'LIKE', "%$request->search%")
@@ -105,11 +118,15 @@ class BannerController extends Controller
             $cursor = $Banner;
 
             if($cursor->count() > 0 ) {
-                return response()->json($cursor);
-            } else {
-                echo json_encode(
-                    array("message" => "No Banner are found.")
-                );
+                return response()->json([
+                    'data'      => $cursor,
+                    'result'    => false
+                ]);
+            } else {                
+                return response()->json([
+                    'message'   => '"No Banner are found.',
+                    'result'    => false
+                ]);
             }
         }
     }
@@ -147,13 +164,15 @@ class BannerController extends Controller
         $banner->position = $request->position;
 
         if($banner->save()) {
-            echo json_encode(
-                array("message" => "New Banner Created.")
-            );
+            return response()->json([
+                'message'   => 'New Banner Created.',
+                'result'    =>  true
+            ]);
         } else {
-            echo json_encode(
-                array("message" => "Banner not created.")
-            );
+            return response()->json([
+                'message'   => 'Banner not created.',
+                'result'    =>  false
+            ]);
         }
     }
 
@@ -195,18 +214,21 @@ class BannerController extends Controller
                                 'enddate'       => $request->enddate,
                                 'position'       => $request->position,
             ])) {
-                echo json_encode(
-                    array("message" => "Banner Updated.")
-                );
+                return response()->json([
+                    'message'   => 'Banner Updated.',
+                    'result'    =>  true
+                ]);
             } else {
-                echo json_encode(
-                    array("message" => "there is nothing to update.")
-                );
+                return response()->json([
+                    'message'   => 'there is nothing to update.',
+                    'result'    =>  false
+                ]);
             }
         } else {
-            echo json_encode(
-                array("message" => "Banner not found.")
-            );
+            return response()->json([
+                'message'   => 'Banner not found.',
+                'result'    =>  false
+            ]);
         }         
         
     }

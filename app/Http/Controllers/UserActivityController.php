@@ -73,11 +73,14 @@ class UserActivityController extends Controller
                 ];
             }
             
-            return response()->json($dataArray);
-            
+            return response()->json([
+                'data'      =>  $dataArray,
+                'result'    => false
+            ]);
         } else {
             return response()->json([
-                'message'  =>  'you dont have subscription yet!'
+                'message'   =>  'you dont have subscription yet!',
+                'result'    => false
             ]);
         }                     
     }
