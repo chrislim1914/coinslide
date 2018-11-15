@@ -48,7 +48,7 @@ class AdvertiseController extends Controller {
         //the cursor method may be used to greatly reduce your memory usage:
         $cursor = $ads;
         
-        $iduser = $request->iduser;
+        $iduser = $request->has('iduser') ? $request->iduser : 0;
 
         if($cursor->count() > 0 ) {
 
@@ -75,7 +75,7 @@ class AdvertiseController extends Controller {
                 $adsSub = new AdsSubscriptionController();
                 $subscribe = $adsSub->countAdsSubscriptionById($idadvertise);
                 
-                $iduser <= null ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($iduser, $idadvertise);          
+                $iduser == 0 ? $isSubscribe = false : $isSubscribe = $adsSub->isSubscribe($iduser, $idadvertise);          
                 
                 $redistag = new RedisController();
                 $tag = $redistag->loadAdsTag($idadvertise);
@@ -102,7 +102,7 @@ class AdvertiseController extends Controller {
                 'result'    =>  true 
                 ]);
         } else {
-            return response()-json([
+            return response()->json([
                 'message'   => 'no Ads found.',
                 'result'    =>  false
             ]);
